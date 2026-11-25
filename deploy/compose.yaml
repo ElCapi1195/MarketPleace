@@ -1,0 +1,83 @@
+# Stack para Dokploy (tipo Compose). Las variables se definen en Dokploy, nunca en el repo.
+# Enrutado (Dokploy > Domains): Host(dominio) -> web:3000 y Host(dominio) + ruta /api -> api:3001.
+x-hardened: &hardened
+  restart: unless-stopped
+  read_only: true
+  tmpfs: [/tmp]
+  cap_drop: [ALL]
+  security_opt: ['no-new-privileges:true']
+  logging:
+    driver: json-file
+    options: { max-size: 10m, max-file: '3' }
+
+services:
+  web:
+    <<: *hardened
+    image: ${REGISTRY:?}/marketplace-web:${IMAGE_TAG:?}
+    environment:
+      VERTICAL: ${VERTICAL:?}
+    networks: [dokploy-network]
+    mem_limit: 512m
+    pids_limit: 200
+    tmpfs: [/tmp, /app/apps/web/.next/cache:uid=1000]
+
+  api:
+    <<: *hardened
+    image: ${REGISTRY:?}/marketplace-api:${IMAGE_TAG:?}
+    environment:
+      NODE_ENV: production
+      VERTICAL: ${VERTICAL:?}
+      TRUST_PROXY_HOPS: ${TRUST_PROXY_HOPS:-1}
+      DATABASE_URL: postgresql://marketplace:${POSTGRES_PASSWORD:?}@postgres:5432/marketplace
+      REDIS_URL: redis://:${REDIS_PASSWORD:?}@redis:6379
+    networks: [dokploy-network, internal]
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    mem_limit: 512m
+    pids_limit: 200
+
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: marketplace
+      POSTGRES_DB: marketplace
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
+    volumes: ['postgres-data:/var/lib/postgresql/data']
+    networks: [internal]
+    security_opt: ['no-new-privileges:true']
+    mem_limit: 768m
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U marketplace -d marketplace']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:8-alpine
+    restart: unless-stopped
+    environment:
+      REDISCLI_AUTH: ${REDIS_PASSWORD:?}
+    # noeviction: BullMQ perdería trabajos si Redis expulsara claves.
+    command: ['sh', '-c', 'exec redis-server --requirepass "$$REDISCLI_AUTH" --maxmemory 96mb --maxmemory-policy noeviction --appendonly yes']
+    volumes: ['redis-data:/data']
+    networks: [internal]
+    security_opt: ['no-new-privileges:true']
+    mem_limit: 128m
+    healthcheck:
+      test: ['CMD-SHELL', 'redis-cli ping | grep -q PONG']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-data:
+  redis-data:
+
+networks:
+  internal:
+    internal: true
+  dokploy-network:
+    external: true

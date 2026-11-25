@@ -1,0 +1,7 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "web", "runtimeExecutable": "corepack", "runtimeArgs": ["pnpm", "--filter", "@marketplace/web", "dev"], "port": 4310, "autoPort": false },
+    { "name": "api", "runtimeExecutable": "corepack", "runtimeArgs": ["pnpm", "--filter", "@marketplace/api", "start:dev"], "port": 4311, "autoPort": false }
+  ]
+}

@@ -1,0 +1,25 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/anybody/wdth.css';
+@import '@fontsource-variable/hanken-grotesk';
+
+/* Los valores --brand-* los define el nicho activo en el layout. */
+@theme inline {
+  --color-background: var(--brand-background);
+  --color-surface: var(--brand-surface);
+  --color-ink: var(--brand-text);
+  --color-accent: var(--brand-accent);
+  --font-sans: 'Hanken Grotesk Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Anybody Variable', ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-background font-sans text-ink antialiased;
+  }
+  :focus-visible {
+    @apply outline-3 outline-offset-3 outline-ink;
+  }
+  .bg-ink :focus-visible {
+    @apply outline-accent;
+  }
+}
