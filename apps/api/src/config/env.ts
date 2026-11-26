@@ -30,7 +30,7 @@ const envSchema = z
     MEDIA_DIR: z.string().min(1),
     // Documentos de las tiendas: datos personales, con su propio volumen y su propia retención.
     DOCUMENTS_DIR: z.string().min(1),
-    SMTP_URL: url(['smtp:', 'smtps:']).optional(),
+    SMTP_URL: z.preprocess((value) => value === '' ? undefined : value, url(['smtp:', 'smtps:']).optional()),
     MAIL_FROM: z.string().min(3).default('no-responder@localhost'),
   })
   .superRefine(({ NODE_ENV, PUBLIC_URL, SMTP_URL, AUTH_SECRET, MEDIA_DIR, DOCUMENTS_DIR }, ctx) => {
