@@ -1,9 +1,11 @@
 import { randomUUID } from 'node:crypto';
 import type { NestExpressApplication } from '@nestjs/platform-express';
+import { loadVertical } from '@marketplace/verticals';
 import { Secret, TOTP } from 'otpauth';
 import request from 'supertest';
 import { createApp, type AppOptions } from '../../src/app.js';
 import { createPrisma, type Prisma } from '../../src/database/prisma.js';
+import { memoryStorage, type MemoryStorage } from './storage.js';
 import type { Mail, Mailer } from '../../src/modules/mail/mailer.js';
 
 export const ORIGIN = 'https://market.test';
@@ -31,7 +33,7 @@ export class Browser {
 
   constructor(private readonly app: NestExpressApplication) {}
 
-  async send(method: 'get' | 'post', url: string, body?: object, headers: Record<string, string> = {}) {
+  async send(method: 'get' | 'post' | 'patch' | 'delete', url: string, body?: object | Buffer, headers: Record<string, string> = {}) {
     const req = request(this.app.getHttpServer())[method](url).redirects(0).set('origin', ORIGIN).set(headers);
     if (this.cookies.size > 0) req.set('cookie', [...this.cookies].map(([name, value]) => `${name}=${value}`).join('; '));
     const res = await (body === undefined ? req : req.send(body));
@@ -45,6 +47,9 @@ export class Browser {
 
   get = (url: string, headers?: Record<string, string>) => this.send('get', url, undefined, headers);
   post = (url: string, body: object = {}, headers?: Record<string, string>) => this.send('post', url, body, headers);
+  patch = (url: string, body: object) => this.send('patch', url, body);
+  delete = (url: string) => this.send('delete', url);
+  upload = (url: string, body: Buffer, type: string) => this.send('post', url, body, { 'content-type': type });
 
   setCookies(res: request.Response): string[] {
     return (res.headers['set-cookie'] as unknown as string[] | undefined) ?? [];
@@ -57,9 +62,12 @@ export interface TestIdentity {
   app: NestExpressApplication;
   prisma: Prisma;
   mailer: FakeMailer;
+  storage: MemoryStorage;
   browser(): Browser;
   /** Crea una cuenta verificada y devuelve su email. */
   account(role?: string): Promise<string>;
+  /** Navegador con la sesión iniciada y, si el rol lo exige, con 2FA. */
+  signedIn(role?: string, twoFactor?: boolean): Promise<Browser>;
   stop(): Promise<void>;
 }
 
@@ -68,28 +76,40 @@ export const newEmail = () => `${randomUUID()}@example.test`;
 export async function startIdentity(appUrl: string, overrides: Partial<AppOptions> = {}): Promise<TestIdentity> {
   const prisma = createPrisma(appUrl);
   const mailer = new FakeMailer();
+  const storage = memoryStorage();
   const app = await createApp({
     probes: [],
     trustProxyHops: 1,
     logger: false,
     prisma,
     mailer,
+    storage,
+    vertical: loadVertical('gamer'),
     auth: { publicUrl: ORIGIN, secret: 'x'.repeat(48), brandName: 'Mercado de Prueba', rateLimit: false },
     ...overrides,
   });
   await app.init();
   const browser = () => new Browser(app);
 
+  const account = async (role = 'customer') => {
+    const email = newEmail();
+    await browser().post('/api/auth/sign-up/email', { name: 'Persona', email, password: PASSWORD });
+    await prisma.user.update({ where: { email }, data: { emailVerified: true, platformRole: role } });
+    return email;
+  };
+
   return {
     app,
     prisma,
     mailer,
+    storage,
     browser,
-    account: async (role = 'customer') => {
-      const email = newEmail();
-      await browser().post('/api/auth/sign-up/email', { name: 'Persona', email, password: PASSWORD });
-      await prisma.user.update({ where: { email }, data: { emailVerified: true, platformRole: role } });
-      return email;
+    account,
+    signedIn: async (role = 'customer', twoFactor = role !== 'customer') => {
+      const client = browser();
+      await client.signIn(await account(role));
+      if (twoFactor) await enableTwoFactor(client);
+      return client;
     },
     stop: async () => {
       await app.close();

@@ -24,6 +24,7 @@ const platform: AttributeInput = {
     { value: 'xbox', label: 'Xbox' },
     { value: 'nintendo', label: 'Nintendo' },
     { value: 'pc', label: 'PC' },
+    { value: 'multiplataforma', label: 'Multiplataforma' },
   ],
 };
 
@@ -48,7 +49,7 @@ export const gamer: VerticalInput = {
   brand: {
     name: 'Marketplace Gamer',
     tagline: 'Consolas, accesorios y servicios de tiendas verificadas.',
-    colors: { background: '#e3e4fb', surface: '#cfd1f6', text: '#1d1557', accent: '#ffc22e' },
+    colors: { background: '#f8f8ff', surface: '#e6e7fb', text: '#1d1557', accent: '#ffc22e' },
   },
   categories: [
     {

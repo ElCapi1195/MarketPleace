@@ -129,3 +129,64 @@ model AuditEvent {
   @@index([targetType, targetId, at])
   @@map("audit_event")
 }
+
+/// Tienda. F2 añade la verificación, los documentos y los miembros.
+model Store {
+  id        String    @id @default(uuid(7)) @db.Uuid
+  slug      String    @unique
+  name      String
+  status    String    @default("ACTIVE")
+  createdAt DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @db.Timestamptz(3)
+  products  Product[]
+
+  @@map("store")
+}
+
+model Product {
+  id           String         @id @default(uuid(7)) @db.Uuid
+  storeId      String         @db.Uuid
+  slug         String         @unique
+  title        String
+  description  String
+  categorySlug String
+  kind         String
+  priceMinor   Int
+  depositMinor Int
+  units        Int?
+  availableOn  DateTime?      @db.Date
+  attributes   Json           @default("{}")
+  featured     Boolean        @default(false)
+  status       String         @default("DRAFT")
+  /// Texto plegado (sin tildes ni signos) para buscar.
+  searchText   String
+  version      Int            @default(1)
+  createdBy    String?
+  publishedAt  DateTime?      @db.Timestamptz(3)
+  createdAt    DateTime       @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime       @updatedAt @db.Timestamptz(3)
+  store        Store          @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  media        ProductMedia[]
+
+  @@index([status, publishedAt])
+  @@index([status, categorySlug])
+  @@index([storeId])
+  @@map("product")
+}
+
+/// Archivo de un producto. El id, aleatorio, es también su clave de almacenamiento.
+model ProductMedia {
+  id        String   @id @db.Uuid
+  productId String   @db.Uuid
+  kind      String
+  alt       String   @default("")
+  position  Int      @default(0)
+  width     Int?
+  height    Int?
+  bytes     Int
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([productId, position])
+  @@map("product_media")
+}

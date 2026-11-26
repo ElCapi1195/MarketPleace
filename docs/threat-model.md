@@ -21,8 +21,12 @@ Objetivo: OWASP ASVS nivel 2. Se revisa al cerrar cada fase.
 | Redirección abierta | Destinos internos en web y API | F1 | Hecho |
 | Acceso a función olvidada | Guard global que deniega por defecto | F1 | Hecho |
 | Borrar huellas | Rol de BD sin privilegios y triggers de solo inserción | F1 | Hecho |
-| Acceso entre tiendas | `storeId` obligatorio + matriz de pruebas | F2–F4 | Pendiente |
-| Archivos maliciosos | Recodificar, volumen privado, descarga forzada | F2–F3 | Pendiente |
+| Acceso entre tiendas | `storeId` obligatorio + matriz de pruebas | F2–F4 | `storeId` listo; hoy solo publica la administración |
+| Fotos maliciosas | Firma real, 40 Mpx, recodificar sin EXIF, tipo fijado por el servidor, `nosniff` | F3 | Hecho |
+| Modelos 3D maliciosos | Estructura, ciclos, límites y texturas validados; sin recursos externos; sin extensiones desconocidas | F3 | Hecho |
+| Agotar memoria subiendo | Autorizar antes de leer, tope de 10 y 15 MB | F3 | Hecho |
+| Ver borradores por su id | Los archivos comprueban el estado del producto y la tienda en cada petición | F3 | Hecho |
+| Documentos de tiendas | Volumen privado, descarga forzada, auditados | F2 | Pendiente |
 | Sobreventa por concurrencia | Bloqueo de fila y versión al aprobar | F4 | Pendiente |
 | Depósito inventado o alterado | Registro solo-inserción con autor y reverso | F4 | Pendiente |
 | Abuso de administrador | Motivo obligatorio y auditoría | F5 | Pendiente |
@@ -33,4 +37,7 @@ Objetivo: OWASP ASVS nivel 2. Se revisa al cerrar cada fase.
 - **Token de sesión en claro en la base:** la cookie va además firmada, así que el valor de la base no basta sin `AUTH_SECRET`.
 - **Contraseñas filtradas:** lista local corta. Consultar un servicio externo es una decisión de privacidad pendiente (F6).
 - **Correos de desarrollo:** la terminal muestra enlaces de acceso. La API no arranca en producción sin SMTP.
+- **Catálogo público sin límite por IP:** las lecturas son baratas y paginadas, pero falta un límite propio o del proxy (F6).
+- **Fotos archivadas:** un navegador puede conservar hasta un día la copia que ya descargó.
+- **Archivos huérfanos:** un corte durante la subida puede dejar un archivo sin fila; no es accesible. Limpieza en F6.
 - **Cuentas sin verificar:** no caducan todavía (F6).

@@ -3,6 +3,7 @@ export type PlatformRole = (typeof platformRoles)[number];
 
 export const permissions = [
   'audit.read',
+  'catalog.manage',
   'listing.moderate',
   'reservation.intervene',
   'store.verify',

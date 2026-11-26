@@ -7,7 +7,8 @@ export function buildCsp(nonce: string, isDev: boolean): string {
     `style-src ${style}`,
     "img-src 'self' blob: data:",
     "font-src 'self'",
-    `connect-src 'self'${isDev ? ' ws:' : ''}`,
+    // blob: lo usa el visor 3D para leer las texturas que el propio modelo lleva dentro.
+    `connect-src 'self' blob:${isDev ? ' ws:' : ''}`,
     "object-src 'none'",
     "base-uri 'none'",
     "form-action 'self'",

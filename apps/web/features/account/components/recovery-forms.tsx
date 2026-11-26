@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { post } from '../lib/api';
+import { post } from '@/lib/client-api';
 import { messageFor } from '../lib/messages';
 import { Field, Form } from './form';
 

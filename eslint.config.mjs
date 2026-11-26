@@ -18,6 +18,15 @@ export default tseslint.config(
     },
   },
   {
+    // Se ejecutan en el navegador.
+    files: ['tools/sample-models/*.js'],
+    languageOptions: { globals: { document: 'readonly', fetch: 'readonly', location: 'readonly', URLSearchParams: 'readonly' } },
+  },
+  {
+    files: ['tools/**/*.mjs'],
+    languageOptions: { globals: { URL: 'readonly', Buffer: 'readonly', setTimeout: 'readonly', clearTimeout: 'readonly' } },
+  },
+  {
     files: ['apps/web/**/*.{ts,tsx}'],
     rules: restrict(
       ['pg', 'ioredis', '@prisma/*', '@nestjs/*', '**/apps/api/**'],

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { encode } from 'uqr';
-import { post } from '../lib/api';
+import { post } from '@/lib/client-api';
 import { messageFor } from '../lib/messages';
 import { parseTotpUri } from '../lib/totp';
 import { Field, Form } from './form';

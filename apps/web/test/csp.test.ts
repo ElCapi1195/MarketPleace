@@ -19,6 +19,10 @@ describe('buildCsp', () => {
     }
   });
 
+  it('solo conecta con el propio sitio y con datos ya descargados', () => {
+    expect(production).toContain("connect-src 'self' blob:;");
+  });
+
   it('relaja solo lo que exige la recarga en desarrollo', () => {
     expect(buildCsp('abc123', true)).toContain("'unsafe-eval'");
   });

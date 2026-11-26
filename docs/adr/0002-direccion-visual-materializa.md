@@ -1,6 +1,6 @@
 # ADR 0002: Dirección visual "Materializa"
 
-Estado: aceptado por el usuario · 2026-11-24
+Estado: portada y recorrido sustituidos por el [ADR 0003](0003-vitrina-y-archivos.md); siguen vigentes fuentes, colores y la regla sin estilos inline · 2026-11-24
 
 - **Idea:** el producto es una línea de puntos y gana cuerpo, color y peso tipográfico al acercarse. El avance se ve en el objeto y siempre se dice también con texto.
 - **Reutilizable:** los colores y las siluetas pertenecen al nicho; el núcleo solo dibuja capas y un progreso de 0 a 1.

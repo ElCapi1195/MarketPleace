@@ -3,7 +3,7 @@ import { headers } from 'next/headers';
 import type { ReactNode } from 'react';
 import { getVertical } from '@/lib/vertical';
 import { SiteHeader } from '@/features/shell/site-header';
-import { samplesEnabled } from '@/features/arrivals/source';
+import { samplesEnabled } from '@/lib/samples';
 import './globals.css';
 
 export function generateMetadata(): Metadata {

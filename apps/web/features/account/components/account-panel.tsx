@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { get, post } from '../lib/api';
+import { get, post } from '@/lib/client-api';
 import { messageFor } from '../lib/messages';
 import { describeAgent } from '../lib/user-agent';
 import { Field, Form, Screen } from './form';

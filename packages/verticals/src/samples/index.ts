@@ -1,14 +1,17 @@
-import { demoSamples } from './demo.js';
 import { gamerSamples } from './gamer.js';
-import type { SampleArrival } from './types.js';
+import type { SampleProduct } from './types.js';
 
-const samples = new Map<string, readonly SampleArrival[]>([
-  ['gamer', gamerSamples],
-  ['demo', demoSamples],
-]);
+export const SAMPLE_IMAGES = 3;
 
-export function loadSamples(verticalId: string): readonly SampleArrival[] {
+const samples = new Map<string, readonly SampleProduct[]>([['gamer', gamerSamples]]);
+
+export function loadSamples(verticalId: string): readonly SampleProduct[] {
   return samples.get(verticalId) ?? [];
 }
 
-export type { SampleArrival, SampleShape } from './types.js';
+/** Carpeta con los archivos de ejemplo de un nicho. */
+export function sampleAssets(verticalId: string): URL {
+  return new URL(`../../assets/${verticalId}/`, import.meta.url);
+}
+
+export type { SampleProduct } from './types.js';

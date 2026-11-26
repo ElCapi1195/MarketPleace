@@ -26,6 +26,8 @@ const envSchema = z
     REDIS_URL: url(['redis:', 'rediss:']),
     PUBLIC_URL: url(['https:', 'http:']).transform((value) => new URL(value).origin),
     AUTH_SECRET: z.string().min(32, 'al menos 32 caracteres aleatorios'),
+    // Volumen persistente y privado con los archivos subidos. Nunca dentro de lo que sirve la web.
+    MEDIA_DIR: z.string().min(1),
     SMTP_URL: url(['smtp:', 'smtps:']).optional(),
     MAIL_FROM: z.string().min(3).default('no-responder@localhost'),
   })

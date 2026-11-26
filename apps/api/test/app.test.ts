@@ -2,6 +2,8 @@ import { Controller, Get, HttpException } from '@nestjs/common';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import request from 'supertest';
 import { afterEach, describe, expect, it } from 'vitest';
+import { loadVertical } from '@marketplace/verticals';
+import { memoryStorage } from './support/storage.js';
 import { createApp } from '../src/app.js';
 import { createPrisma } from '../src/database/prisma.js';
 import { Public } from '../src/modules/identity/access.js';
@@ -41,6 +43,8 @@ async function start(probes: HealthProbe[] = [ok('postgres'), ok('redis')]) {
     // Nunca llega a conectarse: estas pruebas no tocan la base de datos.
     prisma: createPrisma('postgresql://nadie@127.0.0.1:1/nada'),
     mailer: { send: async () => {} },
+    storage: memoryStorage(),
+    vertical: loadVertical('demo'),
     auth: { publicUrl: 'https://market.test', secret: 'x'.repeat(48), brandName: 'Prueba', rateLimit: false },
   });
   await app.init();

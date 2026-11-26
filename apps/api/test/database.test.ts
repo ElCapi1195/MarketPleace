@@ -83,3 +83,36 @@ describe('restricciones de usuario', () => {
     await expect(user({ email: 'Mayus@Example.test' })).rejects.toThrow(/lowercase_check/);
   });
 });
+
+describe('catálogo', () => {
+  const base = { storeId: '', slug: '', title: 'Prueba', description: '', categorySlug: 'cosas', kind: 'IN_STOCK', priceMinor: 10, depositMinor: 0, searchText: '' };
+  const store = () => prisma.store.create({ data: { slug: randomUUID(), name: 'Tienda' } });
+  const product = async (data: object = {}) =>
+    prisma.product.create({ data: { ...base, storeId: (await store()).id, slug: randomUUID(), ...data } });
+
+  it('acepta un producto válido, que nace como borrador', async () => {
+    expect(await product()).toMatchObject({ status: 'DRAFT', version: 1 });
+  });
+
+  it.each([
+    [{ kind: 'RENTAL' }, /kind_check/],
+    [{ status: 'VISIBLE' }, /status_check/],
+    [{ depositMinor: 11 }, /money_check/],
+    [{ units: -1 }, /units_check/],
+    [{ kind: 'PREORDER' }, /date_check/],
+    [{ availableOn: new Date('2027-01-01') }, /date_check/],
+  ])('rechaza %j', async (data, error) => {
+    await expect(product(data)).rejects.toThrow(error);
+  });
+
+  it('admite un solo modelo 3D por producto', async () => {
+    const { id: productId } = await product();
+    const model = () => prisma.productMedia.create({ data: { id: randomUUID(), productId, kind: 'MODEL', bytes: 1 } });
+    await model();
+    await expect(model()).rejects.toThrow(/Unique constraint/);
+  });
+
+  it.each(['DELETE FROM product', 'DELETE FROM store'])('la aplicación no puede: %s', async (sql) => {
+    await expect(app.query(sql)).rejects.toMatchObject({ code: DENIED });
+  });
+});

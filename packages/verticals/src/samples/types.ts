@@ -1,21 +1,17 @@
-/** Silueta por capas en un lienzo de 200×150: trazados SVG. */
-export interface SampleShape {
-  body: string;
-  detail: string;
-  light: string;
-}
-
-/** Producto ficticio para desarrollar y mostrar la interfaz antes de que exista el catálogo. */
-export interface SampleArrival {
-  slug: string;
-  name: string;
+/** Producto ficticio para desarrollar y mostrar la interfaz. Sus archivos están en `assets/<nicho>`. */
+export interface SampleProduct {
+  /** Nombre base de sus archivos: `<asset>.glb` y `<asset>-1.webp`, `-2`, `-3`. */
+  asset: string;
+  title: string;
+  description: string;
   categorySlug: string;
-  storeName: string;
-  monthsAhead: number;
+  kind: 'PREORDER' | 'IN_STOCK' | 'SERVICE';
   priceMinor: number;
   depositMinor: number;
-  capacity: number;
-  remaining: number;
-  color: string;
-  shape: SampleShape;
+  units: number | null;
+  /** Meses hasta la llegada, solo en preventas. */
+  monthsAhead: number | null;
+  attributes: Record<string, string | number | boolean>;
+  featured: boolean;
+  storeName: string;
 }

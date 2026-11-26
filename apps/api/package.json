@@ -11,9 +11,11 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "dev:db": "node --env-file=../../.env test/support/dev-db.ts",
+    "seed:samples": "node --env-file=../../.env dist/scripts/seed-samples.js",
     "set-role": "node --env-file=../../.env dist/scripts/set-role.js"
   },
   "dependencies": {
+    "@marketplace/contracts": "workspace:*",
     "@marketplace/core": "workspace:*",
     "@marketplace/verticals": "workspace:*",
     "@nestjs/common": "12.6.0",
@@ -29,6 +31,7 @@
     "pg": "8.23.1",
     "reflect-metadata": "0.2.2",
     "rxjs": "7.8.2",
+    "sharp": "0.35.5",
     "zod": "4.6.7"
   },
   "devDependencies": {

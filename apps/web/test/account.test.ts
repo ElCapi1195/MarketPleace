@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { post } from '../features/account/lib/api';
+import { post } from '../lib/client-api';
 import { messageFor } from '../features/account/lib/messages';
 import { safeNext } from '../features/account/lib/safe-next';
 import { describeAgent } from '../features/account/lib/user-agent';

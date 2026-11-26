@@ -11,6 +11,8 @@ RUN corepack enable
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/api/package.json apps/api/
 COPY apps/web/package.json apps/web/
+COPY packages/contracts/package.json packages/contracts/
+COPY packages/core/package.json packages/core/
 COPY packages/verticals/package.json packages/verticals/
 RUN pnpm install --prod --frozen-lockfile --filter "@marketplace/api..."
 
@@ -18,6 +20,8 @@ FROM node:24-alpine
 ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=deps /app .
+COPY --from=build /repo/packages/contracts/dist packages/contracts/dist
+COPY --from=build /repo/packages/core/dist packages/core/dist
 COPY --from=build /repo/packages/verticals/dist packages/verticals/dist
 COPY --from=build /repo/apps/api/dist apps/api/dist
 USER node
