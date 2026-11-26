@@ -26,6 +26,7 @@ model User {
   accounts         Account[]
   twoFactors       TwoFactor[]
   stores           StoreMember[]
+  reservations     Reservation[]
 
   @@map("user")
 }
@@ -141,6 +142,8 @@ model Store {
   taxId       String            @default("")
   phone       String            @default("")
   address     String            @default("")
+  /// Cómo contactar y recoger; lo ven los clientes con una reserva aprobada.
+  pickupInfo  String            @default("")
   status      String            @default("DRAFT")
   createdAt   DateTime          @default(now()) @db.Timestamptz(3)
   updatedAt   DateTime          @updatedAt @db.Timestamptz(3)
@@ -149,6 +152,7 @@ model Store {
   documents   StoreDocument[]
   events      StoreEvent[]
   invitations StoreInvitation[]
+  reservations Reservation[]
 
   @@index([status, updatedAt])
   @@map("store")
@@ -240,6 +244,7 @@ model Product {
   updatedAt    DateTime       @updatedAt @db.Timestamptz(3)
   store        Store          @relation(fields: [storeId], references: [id], onDelete: Restrict)
   media        ProductMedia[]
+  reservations Reservation[]
 
   @@index([status, publishedAt])
   @@index([status, categorySlug])
@@ -262,4 +267,86 @@ model ProductMedia {
 
   @@index([productId, position])
   @@map("product_media")
+}
+
+/// Los importes y la fecha acordados parten de lo solicitado, que no cambia.
+model Reservation {
+  id                   String             @id @default(uuid(7)) @db.Uuid
+  code                 String             @unique
+  customerId           String
+  storeId              String             @db.Uuid
+  productId            String             @db.Uuid
+  idempotencyKey       String             @db.Uuid
+  status               String             @default("PENDING_REVIEW")
+  version              Int                @default(1)
+  kind                 String
+  productTitle         String
+  currency             String             @db.Char(3)
+  requestedPriceMinor  Int
+  requestedDepositMinor Int
+  requestedAvailableOn DateTime?          @db.Date
+  priceMinor           Int
+  depositMinor         Int
+  availableOn          DateTime?          @db.Date
+  offerPriceMinor      Int?
+  offerDepositMinor    Int?
+  offerAvailableOn     DateTime?          @db.Date
+  termsVersion         String
+  phone                String             @default("")
+  note                 String             @default("")
+  /// Compromete una unidad del producto.
+  unitHeld             Boolean            @default(false)
+  approvedAt           DateTime?          @db.Timestamptz(3)
+  expiresAt            DateTime?          @db.Timestamptz(3)
+  createdAt            DateTime           @default(now()) @db.Timestamptz(3)
+  updatedAt            DateTime           @updatedAt @db.Timestamptz(3)
+  customer             User               @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  store                Store              @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  product              Product            @relation(fields: [productId], references: [id], onDelete: Restrict)
+  events               ReservationEvent[]
+  payments             PaymentRecord[]
+
+  @@unique([customerId, idempotencyKey])
+  @@index([customerId, createdAt])
+  @@index([storeId, status, createdAt])
+  @@index([productId])
+  @@map("reservation")
+}
+
+/// Historial. Solo inserción: lo impone la base de datos.
+model ReservationEvent {
+  id            String      @id @default(uuid(7)) @db.Uuid
+  reservationId String      @db.Uuid
+  at            DateTime    @default(now()) @db.Timestamptz(3)
+  action        String
+  fromStatus    String
+  toStatus      String
+  actor         String
+  actorId       String?
+  reason        String      @default("")
+  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Restrict)
+
+  @@index([reservationId, at])
+  @@map("reservation_event")
+}
+
+/// Dinero externo anotado a mano. Solo inserción; se corrige con un reverso.
+model PaymentRecord {
+  id            String         @id @default(uuid(7)) @db.Uuid
+  reservationId String         @db.Uuid
+  at            DateTime       @default(now()) @db.Timestamptz(3)
+  kind          String
+  amountMinor   Int
+  currency      String         @db.Char(3)
+  method        String
+  reference     String         @default("")
+  note          String         @default("")
+  recordedBy    String
+  reversesId    String?        @unique @db.Uuid
+  reservation   Reservation    @relation(fields: [reservationId], references: [id], onDelete: Restrict)
+  reverses      PaymentRecord? @relation("reversal", fields: [reversesId], references: [id], onDelete: Restrict)
+  reversedBy    PaymentRecord? @relation("reversal")
+
+  @@index([reservationId, at])
+  @@map("payment_record")
 }

@@ -79,6 +79,10 @@ export class StoreRepository implements MembershipReader {
     });
   }
 
+  async setPickup(id: string, pickupInfo: string): Promise<void> {
+    await this.prisma.store.update({ where: { id }, data: { pickupInfo } });
+  }
+
   /** Devuelve false si la solicitud ya no se puede editar. */
   async updateApplication(id: string, input: StoreApplicationInput, editable: readonly StoreStatus[]): Promise<boolean> {
     const { count } = await this.prisma.store.updateMany({ where: { id, status: { in: [...editable] } }, data: input });

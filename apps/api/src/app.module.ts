@@ -25,6 +25,13 @@ import { LoginThrottleRepository } from './modules/identity/login-throttle.repos
 import { LoginThrottle } from './modules/identity/login-throttle.service.js';
 import type { Mailer } from './modules/mail/mailer.js';
 import { Outbox } from './modules/mail/outbox.js';
+import { CustomerReservationController, StoreReservationController } from './modules/reservations/reservation.controller.js';
+import { CustomerReservationService } from './modules/reservations/customer-reservation.service.js';
+import { ExpirySweep, SWEEP_INTERVAL } from './modules/reservations/expiry-sweep.js';
+import { RESERVATION_EMAILS, ReservationEmails } from './modules/reservations/reservation.emails.js';
+import { ReservationEngine } from './modules/reservations/reservation.engine.js';
+import { ReservationRepository } from './modules/reservations/reservation.repository.js';
+import { StoreReservationService } from './modules/reservations/store-reservation.service.js';
 import { AdminMediaController, MediaController, StoreMediaController } from './modules/media/media.controller.js';
 import { MediaRepository } from './modules/media/media.repository.js';
 import { MediaService } from './modules/media/media.service.js';
@@ -53,13 +60,15 @@ export interface ModuleOptions {
   /** Documentos de verificación: almacén aparte del de productos. */
   documents: StoragePort;
   vertical: VerticalConfig;
+  /** Milisegundos entre barridos de vencimiento; sin él no hay barridos automáticos. */
+  sweepIntervalMs?: number;
   /** Controladores adicionales; las pruebas los usan para provocar situaciones. */
   controllers?: Type[];
 }
 
 @Module({})
 export class AppModule {
-  static register({ probes, prisma, mailer, auth, storage, documents, vertical, controllers = [] }: ModuleOptions): DynamicModule {
+  static register({ probes, prisma, mailer, auth, storage, documents, vertical, sweepIntervalMs = 0, controllers = [] }: ModuleOptions): DynamicModule {
     const outbox = new Outbox(mailer);
     const emails = new AuthEmails(outbox, auth.brandName, auth.publicUrl);
     return {
@@ -80,6 +89,8 @@ export class AppModule {
         MediaController,
         AdminMediaController,
         StoreMediaController,
+        CustomerReservationController,
+        StoreReservationController,
         ...controllers,
       ],
       providers: [
@@ -102,6 +113,13 @@ export class AppModule {
         ModerationService,
         MediaRepository,
         MediaService,
+        ReservationRepository,
+        ReservationEngine,
+        CustomerReservationService,
+        StoreReservationService,
+        ExpirySweep,
+        { provide: SWEEP_INTERVAL, useValue: sweepIntervalMs },
+        { provide: RESERVATION_EMAILS, useValue: new ReservationEmails(outbox, auth.brandName, auth.publicUrl) },
         { provide: STORAGE, useValue: storage },
         { provide: DOCUMENTS, useValue: documents },
         { provide: STORE_EMAILS, useValue: new StoreEmails(outbox, auth.brandName, auth.publicUrl) },

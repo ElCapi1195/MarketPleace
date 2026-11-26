@@ -1,5 +1,5 @@
 import type { AdminProduct, ListingKind, ProductInput } from '@marketplace/contracts';
-import { parseMoney } from '@/features/catalog/lib/money';
+import { parseMoney, writeMoney } from '@/features/catalog/lib/money';
 
 export interface FormAttribute {
   key: string;
@@ -34,11 +34,6 @@ export function emptyValues({ categories }: FormContext): Values {
     availableOn: '',
     featured: '',
   };
-}
-
-function writeMoney(minor: number, currency: string): string {
-  const digits = new Intl.NumberFormat('en', { style: 'currency', currency }).resolvedOptions().maximumFractionDigits ?? 2;
-  return String(minor / 10 ** digits).replace('.', ',');
 }
 
 type Saved = Omit<ProductInput, 'storeId'> & Pick<AdminProduct, 'store'>;

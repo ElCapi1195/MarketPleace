@@ -8,7 +8,7 @@ import { VERTICAL } from '../../config/vertical.js';
 import type { Store, StoreDocument } from '../../generated/prisma/client.js';
 import { AuditService } from '../audit/audit.service.js';
 import type { CurrentStoreData } from '../identity/access.js';
-import { incomplete, invalidTransition, notEditable, notFound } from './store.errors.js';
+import { incomplete, invalidTransition, notApproved, notEditable, notFound } from './store.errors.js';
 import { StoreRepository } from './store.repository.js';
 import { detailView, summaryView } from './store.views.js';
 
@@ -56,6 +56,14 @@ export class ApplicationService {
   async update(actor: ActorData, store: CurrentStoreData, input: StoreApplicationInput): Promise<StoreDetail> {
     if (!(await this.stores.updateApplication(store.id, input, EDITABLE))) throw notEditable();
     await this.record(actor, 'store.application_updated', store.id);
+    return this.get(store);
+  }
+
+  /** Lo que leerán los clientes con una reserva aprobada. Se puede cambiar cuando se quiera. */
+  async setPickup(actor: ActorData, store: CurrentStoreData, pickupInfo: string): Promise<StoreDetail> {
+    if (store.status !== 'APPROVED') throw notApproved();
+    await this.stores.setPickup(store.id, pickupInfo);
+    await this.record(actor, 'store.pickup_changed', store.id);
     return this.get(store);
   }
 

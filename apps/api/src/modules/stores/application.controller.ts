@@ -1,4 +1,4 @@
-import { storeApplicationInput, type StoreApplicationInput } from '@marketplace/contracts';
+import { pickupInput, storeApplicationInput, type PickupInput, type StoreApplicationInput } from '@marketplace/contracts';
 import { Body, Controller, Delete, Get, HttpCode, Inject, Param, Patch, Post, Req, Res, StreamableFile } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { Actor, type ActorData } from '../../common/actor.js';
@@ -48,6 +48,12 @@ export class ApplicationController {
     @Body(new ZodPipe(storeApplicationInput)) input: StoreApplicationInput,
   ) {
     return this.applications.update(actor, store, input);
+  }
+
+  @Patch(':storeId/pickup')
+  @RequireStore('store.edit')
+  setPickup(@Actor() actor: ActorData, @CurrentStore() store: CurrentStoreData, @Body(new ZodPipe(pickupInput)) { pickupInfo }: PickupInput) {
+    return this.applications.setPickup(actor, store, pickupInfo);
   }
 
   @Post(':storeId/submit')

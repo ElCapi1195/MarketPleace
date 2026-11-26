@@ -18,6 +18,7 @@ async function main(): Promise<void> {
     storage: diskStorage(env.MEDIA_DIR),
     documents: diskStorage(env.DOCUMENTS_DIR),
     vertical,
+    sweepIntervalMs: 60_000,
     auth: {
       publicUrl: env.PUBLIC_URL,
       secret: env.AUTH_SECRET,

@@ -47,6 +47,12 @@ Los equipos de ejemplo son modelos originales. Para regenerarlos (necesita Chrom
 
 Decisiones: [ADR 0004](docs/adr/0004-tiendas-y-alcance.md).
 
+## Reservas
+
+El cliente solicita desde la ficha y sigue su reserva en `/reservas`. La tienda las gestiona en `/tienda/<id>/reservas`: aprobar, proponer cambios, rechazar, avanzar y anotar dinero recibido o devuelto fuera de la web. Antes de aprobar debe escribir cómo contactarla y recoger. La API cierra cada minuto lo vencido, sin procesos aparte.
+
+Plazos, máximo de activas y condiciones están en el nicho (`reservations`). Decisiones: [ADR 0005](docs/adr/0005-reservas.md).
+
 ## Despliegue
 
 Lo gestiona Codex. `deploy/` y `.forgejo/workflows/` son borradores: solo se validó la sintaxis de `compose.yaml`; las imágenes no se han construido ni desplegado. Pendiente de incorporar ahí desde F1:

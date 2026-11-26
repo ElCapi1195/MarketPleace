@@ -27,6 +27,8 @@ interface StoreData {
   slug: string;
   name: string;
   about: string;
+  /** Cómo contactar y recoger; lo ven los clientes con una reserva aprobada. */
+  pickupInfo: string;
   legalName: string;
   taxId: string;
   phone: string;

@@ -78,6 +78,11 @@ export const gamer: VerticalInput = {
     depositHours: 72,
     pickupHours: 168,
     maxActivePerCustomer: 5,
+    // PROVISIONAL: debe revisarlo el propietario con asesoría legal.
+    terms: {
+      version: '2026-11-provisional',
+      text: 'Solicitar no es comprar ni te cobra nada. La tienda puede aceptar, proponer otro precio o fecha, o rechazar. El depósito y el pago se hacen directamente con la tienda, fuera de esta web, que solo los anota. Si la tienda cancela, debe devolverte lo que hayas pagado. Cuando la tienda ya ha comprado el producto a su proveedor, cancelar requiere hablar con ella.',
+    },
   },
   listings: { remoderateOn: ['title', 'category', 'price', 'images'], maxImages: 8 },
   storeVerification: {

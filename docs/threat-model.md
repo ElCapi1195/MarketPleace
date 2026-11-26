@@ -33,8 +33,14 @@ Objetivo: OWASP ASVS nivel 2. Se revisa al cerrar cada fase.
 | Invitación robada o reutilizada | Ligada al correo, un uso, 7 días, hash | F2 | Hecho |
 | Tienda sin dueño | Último propietario protegido con bloqueo de fila | F2 | Hecho |
 | Usar la web para enviar spam | Solo tiendas verificadas invitan; máximo 20 pendientes | F2 | Hecho |
-| Sobreventa por concurrencia | Bloqueo de fila y versión al aprobar | F4 | Pendiente |
-| Depósito inventado o alterado | Registro solo-inserción con autor y reverso | F4 | Pendiente |
+| Sobreventa por concurrencia | Bloqueo de reserva y producto, versión y restricciones | F4 | Hecho (20 aprobaciones simultáneas, 1 éxito) |
+| Vaciar el stock con solicitudes falsas | Solicitar no compromete unidades; máximo de activas; una por producto | F4 | Hecho |
+| Reserva duplicada o reintentada | Clave de idempotencia por cliente | F4 | Hecho |
+| Cambiar precio o condiciones a última hora | Lo visto viaja con la solicitud y queda congelado; términos con versión | F4 | Hecho |
+| Aprobar la propia reserva | Rechazado en decisiones y pagos | F4 | Hecho |
+| Obtener contactos sin compromiso | Correo y teléfono solo tras aprobar; los correos no llevan datos | F4 | Hecho |
+| Depósito inventado o alterado | Solo inserción, autor en auditoría, reverso único, visible para el cliente | F4 | Hecho; si la tienda no lo anota, el cliente debe reclamar (F5) |
+| Datos de tarjeta en notas | Detección por Luhn y rechazo | F4 | Hecho |
 | Abuso de administrador | Motivo obligatorio y auditoría | F5 | Pendiente |
 
 ## Riesgos aceptados y por revisar
@@ -50,4 +56,6 @@ Objetivo: OWASP ASVS nivel 2. Se revisa al cerrar cada fase.
 - **Retención de documentos:** no se borran solos tras decidir. Falta el proceso en segundo plano (F6). El cifrado en reposo depende del volumen.
 - **Segundo paso desactivado:** quien lo quite pierde el acceso a su tienda hasta reactivarlo.
 - **Suplantar una marca en el nombre de la tienda:** lo detecta quien revisa, no la web.
+- **Aprobar para ver contactos:** una tienda verificada puede aprobar y cancelar solo para ver un correo. Queda en el historial; supervisión en F5.
+- **Plazos largos y reloj:** dependen de la hora del servidor de base de datos y de la API.
 - **Cuentas sin verificar:** no caducan todavía (F6).

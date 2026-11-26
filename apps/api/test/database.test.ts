@@ -147,3 +147,78 @@ describe('tiendas', () => {
     await expect(prisma.storeMember.update({ where: { storeId_userId: { storeId, userId: id } }, data: { role: 'ADMIN' } })).rejects.toThrow(/role_check/);
   });
 });
+
+describe('reservas', () => {
+  async function reservation(data: object = {}) {
+    const id = randomUUID();
+    await prisma.user.create({ data: { id, name: 'P', email: `${id}@example.test` } });
+    const store = await prisma.store.create({ data: { slug: randomUUID(), name: 'Tienda' } });
+    const product = await prisma.product.create({
+      data: { storeId: store.id, slug: randomUUID(), title: 'P', description: '', categorySlug: 'x', kind: 'IN_STOCK', priceMinor: 10, depositMinor: 0, searchText: '' },
+    });
+    return prisma.reservation.create({
+      data: {
+        code: randomUUID(),
+        customerId: id,
+        storeId: store.id,
+        productId: product.id,
+        idempotencyKey: randomUUID(),
+        kind: 'IN_STOCK',
+        productTitle: 'P',
+        currency: 'USD',
+        requestedPriceMinor: 10,
+        requestedDepositMinor: 0,
+        priceMinor: 10,
+        depositMinor: 0,
+        termsVersion: '1',
+        expiresAt: new Date(),
+        ...data,
+      },
+    });
+  }
+
+  it.each([
+    [{ status: 'OTRO', approvedAt: new Date(), expiresAt: null }, /status_check/],
+    [{ status: 'CONFIRMED', expiresAt: null }, /approved_check/],
+    [{ unitHeld: true }, /held_check/],
+    [{ expiresAt: null }, /deadline_check/],
+    [{ depositMinor: 11 }, /money_check/],
+    [{ offerPriceMinor: 5, offerDepositMinor: 0 }, /offer_check/],
+    [{ status: 'AWAITING_CUSTOMER', approvedAt: new Date() }, /offer_check/],
+  ])('rechaza %j', async (data, error) => {
+    await expect(reservation(data)).rejects.toThrow(error);
+  });
+
+  it('solo una activa por producto y cliente', async () => {
+    const first = await reservation();
+    const again = () => reservation({ customerId: first.customerId, productId: first.productId, storeId: first.storeId });
+    await expect(again()).rejects.toThrow(/Unique constraint/);
+    await prisma.reservation.update({ where: { id: first.id }, data: { status: 'CANCELLED', expiresAt: null } });
+    await expect(again()).resolves.toBeDefined();
+  });
+
+  it('un pago solo se reversa una vez y los importes tienen su signo', async () => {
+    const { id: reservationId } = await reservation();
+    const base = { reservationId, kind: 'DEPOSIT', currency: 'USD', method: 'CASH', recordedBy: 'x' };
+    const { id } = await prisma.paymentRecord.create({ data: { ...base, amountMinor: 5 } });
+    await expect(prisma.paymentRecord.create({ data: { ...base, amountMinor: -5 } })).rejects.toThrow(/amount_check/);
+    await expect(prisma.paymentRecord.create({ data: { ...base, amountMinor: 5, reversesId: id } })).rejects.toThrow(/amount_check/);
+    await prisma.paymentRecord.create({ data: { ...base, amountMinor: -5, reversesId: id } });
+    await expect(prisma.paymentRecord.create({ data: { ...base, amountMinor: -5, reversesId: id } })).rejects.toThrow(/Unique constraint/);
+  });
+
+  it.each(['payment_record', 'reservation_event'])('%s no se puede reescribir', async (table) => {
+    const { id: reservationId } = await reservation();
+    await prisma.paymentRecord.create({ data: { reservationId, kind: 'DEPOSIT', amountMinor: 5, currency: 'USD', method: 'CASH', recordedBy: 'x' } });
+    await prisma.reservationEvent.create({ data: { reservationId, action: 'x', fromStatus: 'x', toStatus: 'x', actor: 'SYSTEM' } });
+    for (const client of [app, owner]) {
+      for (const sql of [`UPDATE ${table} SET at = now()`, `DELETE FROM ${table}`, `TRUNCATE ${table} CASCADE`]) {
+        await expect(client.query(sql)).rejects.toMatchObject({ code: DENIED });
+      }
+    }
+  });
+
+  it('la aplicación no puede borrar reservas', async () => {
+    await expect(app.query('DELETE FROM reservation')).rejects.toMatchObject({ code: DENIED });
+  });
+});

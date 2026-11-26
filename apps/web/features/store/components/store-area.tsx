@@ -11,10 +11,12 @@ import type { Requirement } from '../lib/documents';
 import { ApplicationForm } from './application-form';
 import { DocumentList } from './document-list';
 import { History } from './history';
+import { PickupForm } from './pickup-form';
 import { Progress } from './progress';
 
 export function StoreNav({ store }: { store: StoreDetail }) {
   const links = [{ href: `/tienda/${store.id}`, label: 'Tienda' }];
+  if (storeCan(store.role, 'reservation.read')) links.push({ href: `/tienda/${store.id}/reservas`, label: 'Reservas' });
   if (storeCan(store.role, 'product.manage')) links.push({ href: `/tienda/${store.id}/productos`, label: 'Productos' });
   if (storeCan(store.role, 'member.manage')) links.push({ href: `/tienda/${store.id}/equipo`, label: 'Equipo' });
   return (
@@ -91,6 +93,7 @@ export function StoreHome({ id, requirements, locale }: { id: string; requiremen
         return (
           <div className="flex flex-col gap-10">
             <Progress store={store} />
+            {canEdit && store.status === 'APPROVED' && <PickupForm store={store} onChange={reload} />}
             {editable ? (
               <ApplicationForm
                 initial={{ name: store.name, about: store.about, legalName: store.legalName, taxId: store.taxId, phone: store.phone, address: store.address }}

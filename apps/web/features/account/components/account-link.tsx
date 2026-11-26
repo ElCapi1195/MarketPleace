@@ -42,8 +42,13 @@ export function AccountLink() {
           Administrar
         </Link>
       )}
+      {session && (
+        <Link href="/reservas" className={link}>
+          Reservas
+        </Link>
+      )}
       <Link href={session ? '/cuenta' : '/entrar'} className={link}>
-        {session ? 'Mi cuenta' : 'Entrar'}
+        {session ? 'Cuenta' : 'Entrar'}
       </Link>
     </span>
   );

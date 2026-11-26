@@ -60,6 +60,8 @@ export const verticalSchema = z
       depositHours: positiveInt,
       pickupHours: positiveInt,
       maxActivePerCustomer: positiveInt,
+      /** Condiciones que el cliente acepta; cambiar el texto exige cambiar la versión. */
+      terms: z.strictObject({ version: z.string().regex(/^[a-z0-9.-]{1,40}$/i), text: z.string().trim().min(20).max(4000) }),
     }),
     listings: z.strictObject({
       remoderateOn: z.array(z.enum(['title', 'category', 'price', 'images'])),

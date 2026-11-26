@@ -84,7 +84,7 @@ Antes de COMPLETED: CANCELLED (actor + motivo).  Con plazo vencido: EXPIRED.
 - Al solicitar se congelan precio, fecha estimada, política de depósito y términos aceptados.
 - Aprobar: transacción + bloqueo de fila del cupo/stock + versión optimista. Sin unidades → 409.
 - Crear exige clave de idempotencia; máximo de reservas activas por usuario según el nicho.
-- Vencimientos por worker, idempotentes, más barrido periódico por si se pierde un trabajo.
+- Vencimientos por worker, idempotentes, más barrido periódico por si se pierde un trabajo. (Se resolvió solo con el barrido: ADR 0005.)
 - **Registro manual de pagos:** `payment_records` solo-inserción (depósito, saldo, devolución; unidades menores + ISO 4217; método, referencia, quién). Se corrige con reverso, nunca editando. Sin datos de tarjeta. Política por tienda: ninguno, fijo o porcentaje.
 - Cancelar con depósito registrado marca "devolución pendiente" hasta anotar el reembolso.
 

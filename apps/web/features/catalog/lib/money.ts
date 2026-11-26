@@ -30,3 +30,8 @@ export function parseMoney(text: string, currency: string): number | null {
   const minor = Number(whole.replace(/[.,]/g, '') + fraction.padEnd(digits, '0'));
   return minor <= MAX_MINOR ? minor : null;
 }
+
+/** Importe editable: sin símbolo ni separador de miles. */
+export function writeMoney(minor: number, currency: string): string {
+  return String(minor / 10 ** digitsOf(currency)).replace('.', ',');
+}

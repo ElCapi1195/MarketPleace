@@ -19,14 +19,14 @@ async function request<T>(path: string, init: RequestInit): Promise<ApiResult<T>
   }
 }
 
-const json = (method: string, body: object): RequestInit => ({
+const json = (method: string, body: object, headers: Record<string, string> = {}): RequestInit => ({
   method,
-  headers: { 'content-type': 'application/json' },
+  headers: { 'content-type': 'application/json', ...headers },
   body: JSON.stringify(body),
 });
 
 export const get = <T>(path: string) => request<T>(path, { method: 'GET' });
-export const post = <T>(path: string, body: object) => request<T>(path, json('POST', body));
+export const post = <T>(path: string, body: object, headers?: Record<string, string>) => request<T>(path, json('POST', body, headers));
 export const patch = <T>(path: string, body: object) => request<T>(path, json('PATCH', body));
 export const remove = (path: string) => request<null>(path, { method: 'DELETE' });
 

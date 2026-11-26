@@ -49,12 +49,17 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <span className="block">Vendido por {product.storeName}</span>
         </p>
         <div className="flex flex-col gap-2">
-          <button type="button" disabled aria-describedby="request-note" className="min-h-14 rounded-xl bg-accent px-6 text-lg font-bold text-ink opacity-60">
-            Solicitar reserva
-          </button>
-          <p id="request-note" className="text-sm">
-            Las reservas se abrirán pronto. Solicitar no te cobrará nada.
-          </p>
+          {product.units === 0 ? (
+            <p className="rounded-xl bg-surface p-4 text-center text-lg font-bold">Agotado</p>
+          ) : (
+            <Link
+              href={`/producto/${product.slug}/reservar`}
+              className="inline-flex min-h-14 items-center justify-center rounded-xl bg-accent px-6 text-lg font-bold text-ink hover:underline"
+            >
+              Solicitar reserva
+            </Link>
+          )}
+          <p className="text-sm">Solicitar no te cobra nada.</p>
         </div>
         {product.description && <p className="max-w-prose text-lg whitespace-pre-line">{product.description}</p>}
         {details.length > 0 && (

@@ -25,6 +25,7 @@ export const demo: VerticalInput = {
     depositHours: 24,
     pickupHours: 48,
     maxActivePerCustomer: 2,
+    terms: { version: 'demo-1', text: 'Solicitar no te cobra nada. La tienda revisa cada reserva antes de aceptarla.' },
   },
   listings: { remoderateOn: ['category'], maxImages: 4 },
   storeVerification: { documents: [{ key: 'registro', label: 'Registro', required: true }] },

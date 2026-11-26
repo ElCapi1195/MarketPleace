@@ -27,6 +27,7 @@ const details = (store: StoreRow) => ({
   slug: store.slug,
   name: store.name,
   about: store.about,
+  pickupInfo: store.pickupInfo,
   legalName: store.legalName,
   taxId: store.taxId,
   phone: store.phone,
