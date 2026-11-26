@@ -25,7 +25,15 @@ import { LoginThrottleRepository } from './modules/identity/login-throttle.repos
 import { LoginThrottle } from './modules/identity/login-throttle.service.js';
 import type { Mailer } from './modules/mail/mailer.js';
 import { Outbox } from './modules/mail/outbox.js';
-import { CustomerReservationController, StoreReservationController } from './modules/reservations/reservation.controller.js';
+import { OverviewController, OverviewRepository } from './modules/admin/overview.js';
+import { AdminUserController } from './modules/identity/admin-user.controller.js';
+import { AdminUserRepository } from './modules/identity/admin-user.repository.js';
+import { AdminUserService } from './modules/identity/admin-user.service.js';
+import { AdminReportController, ReportController } from './modules/reports/report.controller.js';
+import { ReportRepository } from './modules/reports/report.repository.js';
+import { REPORT_OUTBOX, ReportService } from './modules/reports/report.service.js';
+import { AdminReservationService } from './modules/reservations/admin-reservation.service.js';
+import { AdminReservationController, CustomerReservationController, StoreReservationController } from './modules/reservations/reservation.controller.js';
 import { CustomerReservationService } from './modules/reservations/customer-reservation.service.js';
 import { ExpirySweep, SWEEP_INTERVAL } from './modules/reservations/expiry-sweep.js';
 import { RESERVATION_EMAILS, ReservationEmails } from './modules/reservations/reservation.emails.js';
@@ -91,6 +99,11 @@ export class AppModule {
         StoreMediaController,
         CustomerReservationController,
         StoreReservationController,
+        AdminReservationController,
+        ReportController,
+        AdminReportController,
+        AdminUserController,
+        OverviewController,
         ...controllers,
       ],
       providers: [
@@ -117,6 +130,13 @@ export class AppModule {
         ReservationEngine,
         CustomerReservationService,
         StoreReservationService,
+        AdminReservationService,
+        ReportRepository,
+        ReportService,
+        AdminUserRepository,
+        AdminUserService,
+        OverviewRepository,
+        { provide: REPORT_OUTBOX, useValue: { outbox, brandName: auth.brandName, publicUrl: auth.publicUrl } },
         ExpirySweep,
         { provide: SWEEP_INTERVAL, useValue: sweepIntervalMs },
         { provide: RESERVATION_EMAILS, useValue: new ReservationEmails(outbox, auth.brandName, auth.publicUrl) },

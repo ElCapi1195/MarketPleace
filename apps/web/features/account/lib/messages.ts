@@ -13,6 +13,7 @@ const MESSAGES = new Map([
   ['TOO_MANY_ATTEMPTS_REQUEST_NEW_CODE', 'Demasiados códigos erróneos. Vuelve a entrar para intentarlo otra vez.'],
   ['ACCOUNT_TEMPORARILY_LOCKED', 'Bloqueamos el segundo paso por seguridad. Espera unos minutos.'],
   ['INVALID_EMAIL', 'Revisa el correo.'],
+  ['ACCOUNT_SUSPENDED', 'Tu cuenta está suspendida. Escríbenos si crees que es un error.'],
   ['NETWORK', 'No hay conexión con el servidor. Revisa tu red e inténtalo de nuevo.'],
 ]);
 

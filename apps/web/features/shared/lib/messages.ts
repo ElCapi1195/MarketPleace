@@ -5,7 +5,9 @@ type Failure = Extract<ApiResult<unknown>, { ok: false }>;
 // Códigos cuyo texto ya viene redactado para la persona.
 const READABLE = new Set([
   'ALREADY_MEMBER',
+  'ALREADY_REPORTED',
   'ALREADY_RESERVED',
+  'ALREADY_RESOLVED',
   'ALREADY_REVERSED',
   'CARD_NUMBER',
   'DEPOSIT_EXCEEDED',
@@ -26,6 +28,7 @@ const READABLE = new Set([
   'OWN_RESERVATION',
   'OWN_STORE',
   'PICKUP_INFO_REQUIRED',
+  'PROTECTED_ACCOUNT',
   'PRICE_EXCEEDED',
   'PRODUCT_CHANGED',
   'REASON_REQUIRED',
@@ -37,6 +40,7 @@ const READABLE = new Set([
   'TERMS_CHANGED',
   'TOO_EARLY',
   'TOO_MANY_APPLICATIONS',
+  'TOO_MANY_REPORTS',
   'TOO_MANY_RESERVATIONS',
   'TOO_MANY_IMAGES',
   'TOO_MANY_INVITATIONS',

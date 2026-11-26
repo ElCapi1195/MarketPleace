@@ -1,6 +1,7 @@
 import { Logger } from '@nestjs/common';
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
+import { APIError } from 'better-auth/api';
 import { twoFactor } from 'better-auth/plugins';
 import type { Prisma } from '../../database/prisma.js';
 import type { AuditService } from '../audit/audit.service.js';
@@ -68,7 +69,12 @@ export function createAuth(config: AuthConfig, { prisma, emails, throttle, audit
       '/two-factor/verify-otp',
       '/error',
     ],
-    user: { additionalFields: { platformRole: { type: 'string', required: false, defaultValue: 'customer', input: false } } },
+    user: {
+      additionalFields: {
+        platformRole: { type: 'string', required: false, defaultValue: 'customer', input: false },
+        suspendedAt: { type: 'date', required: false, input: false },
+      },
+    },
     emailAndPassword: {
       enabled: true,
       autoSignIn: false,
@@ -120,6 +126,17 @@ export function createAuth(config: AuthConfig, { prisma, emails, throttle, audit
     },
     hooks: { before: beforeHook(throttle), after: afterHook(throttle, audit) },
     databaseHooks: {
+      session: {
+        create: {
+          // Una cuenta suspendida no abre sesión, tampoco al terminar el segundo paso.
+          before: async (session) => {
+            const user = await prisma.user.findUnique({ where: { id: session.userId }, select: { suspendedAt: true } });
+            if (user?.suspendedAt) {
+              throw new APIError('FORBIDDEN', { code: 'ACCOUNT_SUSPENDED', message: 'Tu cuenta está suspendida. Escríbenos si crees que es un error.' });
+            }
+          },
+        },
+      },
       user: {
         update: {
           after: async (user, ctx) => {

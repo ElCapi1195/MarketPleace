@@ -11,6 +11,13 @@ export interface AuditRecord {
   metadata?: Record<string, string | number | boolean | null> | undefined;
 }
 
+export interface AuditFilter {
+  action?: string | undefined;
+  actorId?: string | undefined;
+  targetType?: string | undefined;
+  targetId?: string | undefined;
+}
+
 /** Solo inserta y lee: la base de datos rechaza cualquier otra operación. */
 @Injectable()
 export class AuditRepository {
@@ -31,11 +38,22 @@ export class AuditRepository {
   }
 
   /** El id es UUIDv7, así que ordenar por él equivale a ordenar por fecha y sirve de cursor. */
-  findPage(limit: number, cursor: string | undefined) {
+  findPage(limit: number, cursor: string | undefined, filter: AuditFilter = {}) {
+    const { action, actorId, targetType, targetId } = filter;
     return this.prisma.auditEvent.findMany({
-      ...(cursor !== undefined && { where: { id: { lt: cursor } } }),
+      where: {
+        ...(cursor !== undefined && { id: { lt: cursor } }),
+        ...(action && { action: { startsWith: action } }),
+        ...(actorId && { actorId }),
+        ...(targetType && { targetType }),
+        ...(targetId && { targetId }),
+      },
       orderBy: { id: 'desc' },
       take: limit,
     });
+  }
+
+  actors(ids: string[]) {
+    return this.prisma.user.findMany({ where: { id: { in: ids } }, select: { id: true, name: true, email: true } });
   }
 }

@@ -1,10 +1,12 @@
 import {
   customerDecision,
+  interventionInput,
   paymentInput,
   paymentReversal,
   reservationInput,
   storeDecision,
   type CustomerDecision,
+  type InterventionInput,
   type PaymentInput,
   type PaymentReversal,
   type ReservationInput,
@@ -17,13 +19,22 @@ import { Actor, type ActorData } from '../../common/actor.js';
 import { IdempotencyKey } from '../../common/idempotency-key.js';
 import { UuidPipe } from '../../common/uuid.pipe.js';
 import { ZodPipe } from '../../common/zod.pipe.js';
-import { CurrentStore, CurrentUser, RequireStore, type CurrentStoreData, type CurrentUserData } from '../identity/access.js';
+import { CurrentStore, CurrentUser, RequirePermission, RequireStore, type CurrentStoreData, type CurrentUserData } from '../identity/access.js';
+import { AdminReservationService } from './admin-reservation.service.js';
 import { CustomerReservationService } from './customer-reservation.service.js';
 import { StoreReservationService } from './store-reservation.service.js';
 
 const page = z.coerce.number().int().min(1).max(1000).default(1);
 const listQuery = z.object({ page });
 const storeQuery = z.object({ page, status: z.enum(reservationStatuses).optional(), refund: z.literal('pending').optional() });
+const adminQuery = storeQuery.extend({
+  code: z
+    .string()
+    .trim()
+    .toUpperCase()
+    .regex(/^[0-9A-Z]{4}-[0-9A-Z]{4}$/)
+    .optional(),
+});
 
 @Controller('reservations')
 export class CustomerReservationController {
@@ -116,5 +127,27 @@ export class StoreReservationController {
     @Body(new ZodPipe(paymentReversal)) { reason }: PaymentReversal,
   ) {
     return this.reservations.reverse(actor, store, id, paymentId, reason);
+  }
+}
+
+@Controller('admin/reservations')
+@RequirePermission('reservation.intervene')
+export class AdminReservationController {
+  constructor(@Inject(AdminReservationService) private readonly reservations: AdminReservationService) {}
+
+  @Get()
+  list(@Query(new ZodPipe(adminQuery)) query: z.output<typeof adminQuery>) {
+    return this.reservations.list(query);
+  }
+
+  @Get(':id')
+  get(@Actor() actor: ActorData, @Param('id', UuidPipe) id: string) {
+    return this.reservations.get(actor, id);
+  }
+
+  @Post(':id/cancel')
+  @HttpCode(200)
+  cancel(@Actor() actor: ActorData, @Param('id', UuidPipe) id: string, @Body(new ZodPipe(interventionInput)) input: InterventionInput) {
+    return this.reservations.cancel(actor, id, input);
   }
 }

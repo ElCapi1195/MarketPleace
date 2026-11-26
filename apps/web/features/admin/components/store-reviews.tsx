@@ -15,8 +15,8 @@ import { DecisionPanel } from './decision-panel';
 
 const FILTERS: StoreStatus[] = ['SUBMITTED', 'IN_REVIEW', 'NEEDS_INFO', 'APPROVED', 'SUSPENDED', 'REJECTED'];
 
-export function StoreReviewList({ locale }: { locale: string }) {
-  const [status, setStatus] = useState<string>('');
+export function StoreReviewList({ locale, initialStatus = '' }: { locale: string; initialStatus?: string }) {
+  const [status, setStatus] = useState<string>(initialStatus);
   const [page, setPage] = useState(1);
   const { result } = useResource<StoreSummaryPage>(`/api/admin/store-reviews?page=${page}${status ? `&status=${status}` : ''}`);
   return (

@@ -3,7 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { PRISMA, type Prisma } from '../../database/prisma.js';
 import type { PaymentRecord, Product, Reservation, ReservationEvent, Store } from '../../generated/prisma/client.js';
 import { alreadyReserved, idempotencyMismatch, noUnits, notFound, tooMany, versionConflict } from './reservation.errors.js';
-import type { ReservationScope } from './reservation.scope.js';
+import { scopeWhere, type ReservationScope } from './reservation.scope.js';
 
 export type Transaction = Parameters<Parameters<Prisma['$transaction']>[0]>[0];
 
@@ -76,13 +76,19 @@ export class ReservationRepository {
   constructor(@Inject(PRISMA) private readonly prisma: Prisma) {}
 
   find(scope: ReservationScope, id: string): Promise<ReservationRow | null> {
-    return this.prisma.reservation.findFirst({ where: { ...scope, id }, include: include() });
+    return this.prisma.reservation.findFirst({ where: { ...scopeWhere(scope), id }, include: include() });
   }
 
-  findPage(scope: ReservationScope, filter: { status?: ReservationStatus | undefined; withPayments?: boolean }, page: number, size: number) {
+  findPage(
+    scope: ReservationScope,
+    filter: { status?: ReservationStatus | undefined; withPayments?: boolean; code?: string | undefined },
+    page: number,
+    size: number,
+  ) {
     return this.prisma.reservation.findMany({
       where: {
-        ...scope,
+        ...scopeWhere(scope),
+        ...(filter.code && { code: filter.code }),
         ...(filter.status && { status: filter.status }),
         ...(filter.withPayments && { status: { in: ['CANCELLED', 'EXPIRED', 'REJECTED'] }, payments: { some: {} } }),
       },
@@ -214,7 +220,7 @@ export class ReservationRepository {
 
   private async lock(tx: Transaction, scope: ReservationScope | 'system', id: string): Promise<ReservationRow | null> {
     await tx.$queryRaw`SELECT 1 FROM "reservation" WHERE "id" = ${id}::uuid FOR UPDATE`;
-    return tx.reservation.findFirst({ where: { ...(scope === 'system' ? {} : scope), id }, include: include() });
+    return tx.reservation.findFirst({ where: { ...(scope === 'system' ? {} : scopeWhere(scope)), id }, include: include() });
   }
 
   private async apply(tx: Transaction, row: ReservationRow, { action, to, actor, actorId, reason, expiresAt, data }: Change): Promise<void> {

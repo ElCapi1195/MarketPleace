@@ -20,6 +20,8 @@ model User {
   image            String?
   platformRole     String      @default("customer")
   twoFactorEnabled Boolean     @default(false)
+  suspendedAt      DateTime?   @db.Timestamptz(3)
+  suspensionReason String      @default("")
   createdAt        DateTime    @default(now()) @db.Timestamptz(3)
   updatedAt        DateTime    @updatedAt @db.Timestamptz(3)
   sessions         Session[]
@@ -27,6 +29,7 @@ model User {
   twoFactors       TwoFactor[]
   stores           StoreMember[]
   reservations     Reservation[]
+  reports          Report[]
 
   @@map("user")
 }
@@ -349,4 +352,27 @@ model PaymentRecord {
 
   @@index([reservationId, at])
   @@map("payment_record")
+}
+
+/// Denuncia de un producto o de una reserva propia.
+model Report {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  reporterId    String
+  targetType    String
+  productId     String?   @db.Uuid
+  reservationId String?   @db.Uuid
+  /// Tienda afectada: nadie resuelve denuncias sobre la suya.
+  storeId       String    @db.Uuid
+  reason        String
+  details       String    @default("")
+  status        String    @default("OPEN")
+  resolution    String    @default("")
+  resolvedBy    String?
+  resolvedAt    DateTime? @db.Timestamptz(3)
+  createdAt     DateTime  @default(now()) @db.Timestamptz(3)
+  reporter      User      @relation(fields: [reporterId], references: [id], onDelete: Restrict)
+
+  @@index([status, targetType, createdAt])
+  @@index([reporterId, status])
+  @@map("report")
 }

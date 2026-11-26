@@ -6,6 +6,7 @@ import { get, post } from '@/lib/client-api';
 import { messageFor } from '../lib/messages';
 import { describeAgent } from '../lib/user-agent';
 import { Field, Form, Screen } from './form';
+import { MyReports } from '@/features/reports/components/my-reports';
 import { TwoFactorSetup } from './two-factor-setup';
 
 interface Me {
@@ -113,6 +114,7 @@ export function AccountPanel() {
       </Link>
       <TwoFactorSetup enabled={me.twoFactorEnabled} required={me.twoFactorRequired} onChange={load} />
       <Sessions />
+      <MyReports />
       <PasswordForm />
       <button
         type="button"

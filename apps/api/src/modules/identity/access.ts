@@ -105,7 +105,8 @@ export class AccessGuard implements CanActivate {
       headers: fromNodeHeaders(request.headers),
       query: { disableCookieCache: true },
     });
-    if (!session) throw new UnauthorizedException('Inicia sesión para continuar.');
+    // Suspender cierra las sesiones; esto cubre además cualquier carrera.
+    if (!session || session.user.suspendedAt) throw new UnauthorizedException('Inicia sesión para continuar.');
     const { id, name, email, platformRole, twoFactorEnabled } = session.user;
     return { id, name, email, platformRole: platformRole ?? '', twoFactorEnabled: twoFactorEnabled ?? false };
   }

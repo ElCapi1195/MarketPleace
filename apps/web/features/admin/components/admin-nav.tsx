@@ -22,9 +22,14 @@ export function AdminNav() {
     };
   }, []);
   const links = [
+    ...(can(role, 'listing.moderate') ? [{ href: '/admin', label: 'Resumen' }] : []),
     ...(can(role, 'catalog.manage') ? [{ href: '/admin/productos', label: 'Productos' }] : []),
     ...(can(role, 'listing.moderate') ? [{ href: '/admin/moderacion', label: 'Moderación' }] : []),
     ...(can(role, 'store.verify') ? [{ href: '/admin/tiendas', label: 'Tiendas' }] : []),
+    ...(can(role, 'reservation.intervene') ? [{ href: '/admin/reservas', label: 'Reservas' }] : []),
+    ...(can(role, 'listing.moderate') ? [{ href: '/admin/denuncias', label: 'Denuncias' }] : []),
+    ...(can(role, 'user.suspend') ? [{ href: '/admin/usuarios', label: 'Cuentas' }] : []),
+    ...(can(role, 'audit.read') ? [{ href: '/admin/auditoria', label: 'Auditoría' }] : []),
   ];
   return links.length > 0 ? <SectionNav label="Administración" links={links} /> : <div className="h-11" />;
 }

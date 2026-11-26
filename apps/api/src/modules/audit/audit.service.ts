@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { AuditRepository, type AuditRecord } from './audit.repository.js';
+import { AuditRepository, type AuditFilter, type AuditRecord } from './audit.repository.js';
 
 const SENSITIVE = /password|token|secret|email|code|cookie|authorization/i;
 const MAX_PAGE = 100;
@@ -14,9 +14,11 @@ export class AuditService {
     await this.repository.insert({ ...event, metadata: safe });
   }
 
-  async list({ limit, cursor }: { limit: number; cursor?: string | undefined }) {
+  async list({ limit, cursor, ...filter }: { limit: number; cursor?: string | undefined } & AuditFilter) {
     const size = Math.min(MAX_PAGE, Math.max(1, limit));
-    const items = await this.repository.findPage(size, cursor);
-    return { items, nextCursor: items.length === size ? (items.at(-1)?.id ?? null) : null };
+    const rows = await this.repository.findPage(size, cursor, filter);
+    const actors = new Map((await this.repository.actors([...new Set(rows.flatMap(({ actorId }) => actorId ?? []))])).map((user) => [user.id, user]));
+    const items = rows.map((row) => ({ ...row, actor: row.actorId ? (actors.get(row.actorId) ?? null) : null }));
+    return { items, nextCursor: rows.length === size ? (rows.at(-1)?.id ?? null) : null };
   }
 }

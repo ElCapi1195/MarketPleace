@@ -5,10 +5,11 @@ import { getVertical } from '@/lib/vertical';
 
 export const metadata: Metadata = { title: 'Tiendas' };
 
-export default function StoresAdminPage() {
+export default async function StoresAdminPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  const { estado } = await searchParams;
   return (
     <Page title="Tiendas">
-      <StoreReviewList locale={getVertical().locale} />
+      <StoreReviewList locale={getVertical().locale} initialStatus={estado === 'SUBMITTED' ? 'SUBMITTED' : ''} />
     </Page>
   );
 }

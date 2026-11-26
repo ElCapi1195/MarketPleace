@@ -8,6 +8,7 @@ import { TextArea } from '@/features/shared/components/fields';
 import { ResourceGate, useResource } from '@/features/shared/components/resource';
 import { apiMessage } from '@/features/shared/lib/messages';
 import { post } from '@/lib/client-api';
+import { ReportButton } from '@/features/reports/components/report-button';
 import { customerCan } from '../lib/actions';
 import { deadlineText } from '../lib/deadline';
 import { customerStatus } from '../lib/status';
@@ -134,6 +135,7 @@ export function CustomerReservationDetail({ id, locale }: { id: string; locale: 
               </section>
             )}
             <EventList events={reservation.events} locale={locale} />
+            <ReportButton target={{ reservationId: reservation.id }} label="Tengo un problema con esta reserva" />
           </div>
         );
       }}

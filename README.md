@@ -53,6 +53,10 @@ El cliente solicita desde la ficha y sigue su reserva en `/reservas`. La tienda 
 
 Plazos, máximo de activas y condiciones están en el nicho (`reservations`). Decisiones: [ADR 0005](docs/adr/0005-reservas.md).
 
+## Administración
+
+`/admin` resume lo pendiente según el rol. Desde ahí: tiendas, moderación, reservas (cancelar con motivo), denuncias, cuentas (buscar por correo exacto, suspender) y auditoría. Toda intervención exige motivo y toda consulta de datos personales queda registrada. Decisiones: [ADR 0006](docs/adr/0006-administracion.md).
+
 ## Despliegue
 
 Lo gestiona Codex. `deploy/` y `.forgejo/workflows/` son borradores: solo se validó la sintaxis de `compose.yaml`; las imágenes no se han construido ni desplegado. Pendiente de incorporar ahí desde F1:

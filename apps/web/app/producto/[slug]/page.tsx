@@ -8,6 +8,7 @@ import { availability } from '@/features/catalog/lib/availability';
 import { formatMoney } from '@/features/catalog/lib/money';
 import { catalogHref } from '@/features/catalog/lib/params';
 import { buildPath } from '@/features/catalog/lib/path';
+import { ReportButton } from '@/features/reports/components/report-button';
 import { getProduct } from '@/lib/server-api';
 import { getVertical } from '@/lib/vertical';
 
@@ -60,6 +61,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </Link>
           )}
           <p className="text-sm">Solicitar no te cobra nada.</p>
+          <ReportButton target={{ productSlug: product.slug }} label="Denunciar este producto" />
         </div>
         {product.description && <p className="max-w-prose text-lg whitespace-pre-line">{product.description}</p>}
         {details.length > 0 && (

@@ -41,7 +41,9 @@ Objetivo: OWASP ASVS nivel 2. Se revisa al cerrar cada fase.
 | Obtener contactos sin compromiso | Correo y teléfono solo tras aprobar; los correos no llevan datos | F4 | Hecho |
 | Depósito inventado o alterado | Solo inserción, autor en auditoría, reverso único, visible para el cliente | F4 | Hecho; si la tienda no lo anota, el cliente debe reclamar (F5) |
 | Datos de tarjeta en notas | Detección por Luhn y rechazo | F4 | Hecho |
-| Abuso de administrador | Motivo obligatorio y auditoría | F5 | Pendiente |
+| Abuso de administrador | Motivo obligatorio, consultas auditadas, sin listado de personas, nadie decide sobre lo suyo | F5 | Hecho |
+| Cuenta comprometida o fraudulenta | Suspensión que cierra sesiones e impide entrar | F5 | Hecho |
+| Fraude sin canal de aviso | Denuncias con límite, sin duplicados y respuesta por correo | F5 | Hecho |
 
 ## Riesgos aceptados y por revisar
 
@@ -58,4 +60,6 @@ Objetivo: OWASP ASVS nivel 2. Se revisa al cerrar cada fase.
 - **Suplantar una marca en el nombre de la tienda:** lo detecta quien revisa, no la web.
 - **Aprobar para ver contactos:** una tienda verificada puede aprobar y cancelar solo para ver un correo. Queda en el historial; supervisión en F5.
 - **Plazos largos y reloj:** dependen de la hora del servidor de base de datos y de la API.
+- **Administrador malicioso:** puede leer datos y anotar motivos falsos; todo queda a su nombre en una auditoría que no puede borrar. Una segunda persona que revise la auditoría es una práctica, no un control técnico.
+- **Retirar el rol de administrador:** solo desde la línea de órdenes, a propósito.
 - **Cuentas sin verificar:** no caducan todavía (F6).
