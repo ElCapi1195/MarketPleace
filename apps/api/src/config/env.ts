@@ -24,7 +24,11 @@ const envSchema = z
     }),
     DATABASE_URL: url(['postgresql:', 'postgres:']),
     REDIS_URL: url(['redis:', 'rediss:']),
-    PUBLIC_URL: url(['https:', 'http:']).transform((value) => new URL(value).origin),
+    PUBLIC_URL: url(['https:', 'http:']).transform((value) => {
+      const parsed = new URL(value);
+      const pathname = parsed.pathname.replace(/\/$/, '');
+      return `${parsed.origin}${pathname}`;
+    }),
     AUTH_SECRET: z.string().min(32, 'al menos 32 caracteres aleatorios'),
     // Volumen persistente y privado con los archivos subidos. Nunca dentro de lo que sirve la web.
     MEDIA_DIR: z.string().min(1),
