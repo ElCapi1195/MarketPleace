@@ -4,7 +4,8 @@ import { buildCsp } from '@/lib/security/csp';
 /** Aplica la CSP con un nonce distinto por petición; Next lo lee de la cabecera para sus scripts. */
 export function proxy(request: NextRequest): NextResponse {
   const nonce = btoa(crypto.randomUUID());
-  const csp = buildCsp(nonce, process.env.NODE_ENV === 'development');
+  const isHttps = request.nextUrl.protocol === 'https:' || request.headers.get('x-forwarded-proto') === 'https';
+  const csp = buildCsp(nonce, process.env.NODE_ENV === 'development', isHttps);
 
   const headers = new Headers(request.headers);
   headers.set('x-nonce', nonce);

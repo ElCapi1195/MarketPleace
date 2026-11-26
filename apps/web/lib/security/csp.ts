@@ -1,5 +1,5 @@
 /** Política CSP por petición. En desarrollo, React y la recarga en caliente necesitan eval y estilos inline. */
-export function buildCsp(nonce: string, isDev: boolean): string {
+export function buildCsp(nonce: string, isDev: boolean, isHttps = false): string {
   const style = isDev ? "'self' 'unsafe-inline'" : `'self' 'nonce-${nonce}'`;
   const directives = [
     "default-src 'self'",
@@ -14,6 +14,6 @@ export function buildCsp(nonce: string, isDev: boolean): string {
     "form-action 'self'",
     "frame-ancestors 'none'",
   ];
-  if (!isDev) directives.push('upgrade-insecure-requests');
+  if (!isDev && isHttps) directives.push('upgrade-insecure-requests');
   return directives.join('; ');
 }
