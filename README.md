@@ -57,17 +57,19 @@ Plazos, máximo de activas y condiciones están en el nicho (`reservations`). De
 
 `/admin` resume lo pendiente según el rol. Desde ahí: tiendas, moderación, reservas (cancelar con motivo), denuncias, cuentas (buscar por correo exacto, suspender) y auditoría. Toda intervención exige motivo y toda consulta de datos personales queda registrada. Decisiones: [ADR 0006](docs/adr/0006-administracion.md).
 
-## Despliegue
+## Despliegue en Dokploy
 
-Lo gestiona Codex. `deploy/` y `.forgejo/workflows/` son borradores: solo se validó la sintaxis de `compose.yaml`; las imágenes no se han construido ni desplegado. Pendiente de incorporar ahí desde F1:
+En Dokploy crea un servicio Compose enlazado al repositorio, rama `main` y archivo `deploy/compose.yaml`. Dokploy construye las imágenes en el CT110. Define los secretos en las variables del servicio, nunca en el repositorio:
 
-- `prisma generate` en la imagen de la API.
-- Antes de migrar, crear el rol `marketplace_app` (sin propiedad ni DDL) y usarlo en `DATABASE_URL`. Las migraciones (`prisma migrate deploy`) usan el propietario en `MIGRATION_DATABASE_URL`.
-- Variables nuevas de la API: `PUBLIC_URL` (https), `AUTH_SECRET` (aleatorio, ≥ 32), `SMTP_URL`, `MAIL_FROM`, `MEDIA_DIR` y `DOCUMENTS_DIR` (volúmenes persistentes, privados y distintos).
-- Web: `API_INTERNAL_URL`, la dirección interna de la API (por ejemplo `http://api:3001`). Sin ella, la web no arranca.
-- `MEDIA_DIR` se respalda junto con la base: una sin la otra deja productos sin fotos.
-- El proxy debe admitir cuerpos de 15 MB en `/api`.
-- `TRUST_PROXY_HOPS` exacto: de él dependen los límites por IP.
+- `VERTICAL=gamer`
+- `PUBLIC_URL=https://<dominio>` y `TRUST_PROXY_HOPS=1`
+- `AUTH_SECRET`: valor aleatorio de al menos 32 caracteres
+- `POSTGRES_PASSWORD`, `APP_PASSWORD` y `REDIS_PASSWORD`: contraseñas aleatorias URL-safe
+- `SMTP_URL` y `MAIL_FROM`: correo saliente válido
+
+`db-init` crea o actualiza el rol restringido `marketplace_app`; `migrate` aplica las migraciones con el propietario de la base; la API inicia después de ambas tareas y usa `marketplace_app`. Los volúmenes de Postgres, Redis, fotos y documentos son persistentes. Fotos y documentos quedan en volúmenes privados separados; respalda las fotos junto con la base de datos.
+
+En **Domains**, dirige el dominio HTTPS a `web:3000` y `/api` a `api:3001`. El proxy debe permitir cuerpos de hasta 15 MB para `/api`. `TRUST_PROXY_HOPS` debe coincidir con los saltos reales del proxy para que los límites por IP sean correctos.
 
 ## Crear un nicho
 

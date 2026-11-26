@@ -1,4 +1,4 @@
-# Stack para Dokploy (tipo Compose). Las variables se definen en Dokploy, nunca en el repo.
+# Stack para Dokploy. Los secretos y la URL pública se definen como variables en Dokploy.
 # Enrutado (Dokploy > Domains): Host(dominio) -> web:3000 y Host(dominio) + ruta /api -> api:3001.
 x-hardened: &hardened
   restart: unless-stopped
@@ -13,7 +13,10 @@ x-hardened: &hardened
 services:
   web:
     <<: *hardened
-    image: ${REGISTRY:?}/marketplace-web:${IMAGE_TAG:?}
+    image: marketplace-web:${IMAGE_TAG:-latest}
+    build:
+      context: ..
+      dockerfile: deploy/web.Dockerfile
     environment:
       VERTICAL: ${VERTICAL:?}
       API_INTERNAL_URL: http://api:3001
@@ -24,12 +27,21 @@ services:
 
   api:
     <<: *hardened
-    image: ${REGISTRY:?}/marketplace-api:${IMAGE_TAG:?}
+    image: marketplace-api:${IMAGE_TAG:-latest}
+    build:
+      context: ..
+      dockerfile: deploy/api.Dockerfile
     environment:
       NODE_ENV: production
       VERTICAL: ${VERTICAL:?}
       TRUST_PROXY_HOPS: ${TRUST_PROXY_HOPS:-1}
-      DATABASE_URL: postgresql://marketplace:${POSTGRES_PASSWORD:?}@postgres:5432/marketplace
+      HOST: 0.0.0.0
+      PORT: 3001
+      PUBLIC_URL: ${PUBLIC_URL:?}
+      AUTH_SECRET: ${AUTH_SECRET:?}
+      SMTP_URL: ${SMTP_URL:?}
+      MAIL_FROM: ${MAIL_FROM:?}
+      DATABASE_URL: postgresql://marketplace_app:${APP_PASSWORD:?}@postgres:5432/marketplace
       REDIS_URL: redis://:${REDIS_PASSWORD:?}@redis:6379
       MEDIA_DIR: /data/media
       DOCUMENTS_DIR: /data/documents
@@ -38,6 +50,54 @@ services:
     depends_on:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }
+      migrate: { condition: service_completed_successfully }
+    mem_limit: 512m
+    pids_limit: 200
+
+  db-init:
+    image: postgres:17-alpine
+    restart: 'no'
+    environment:
+      MIGRATION_DATABASE_URL: postgresql://marketplace:${POSTGRES_PASSWORD:?}@postgres:5432/marketplace
+      APP_PASSWORD: ${APP_PASSWORD:?}
+    entrypoint: [sh, -ec]
+    command:
+      - |
+        psql "$$MIGRATION_DATABASE_URL" -v ON_ERROR_STOP=1 --set=app_password="$$APP_PASSWORD" <<'SQL'
+        SELECT CASE
+          WHEN EXISTS (SELECT FROM pg_roles WHERE rolname = 'marketplace_app')
+            THEN format('ALTER ROLE marketplace_app LOGIN PASSWORD %L', :'app_password')
+          ELSE format('CREATE ROLE marketplace_app LOGIN PASSWORD %L', :'app_password')
+        END
+        \gexec
+        SQL
+    networks: [internal]
+    depends_on:
+      postgres: { condition: service_healthy }
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ['no-new-privileges:true']
+    mem_limit: 128m
+    pids_limit: 50
+
+  migrate:
+    image: marketplace-migrate:${IMAGE_TAG:-latest}
+    build:
+      context: ..
+      dockerfile: deploy/api.Dockerfile
+      target: build
+    command: [pnpm, --filter, '@marketplace/api', exec, prisma, migrate, deploy]
+    environment:
+      MIGRATION_DATABASE_URL: postgresql://marketplace:${POSTGRES_PASSWORD:?}@postgres:5432/marketplace
+    networks: [internal]
+    depends_on:
+      db-init: { condition: service_completed_successfully }
+    restart: 'no'
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ['no-new-privileges:true']
     mem_limit: 512m
     pids_limit: 200
 

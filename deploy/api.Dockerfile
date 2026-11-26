@@ -3,7 +3,7 @@ WORKDIR /repo
 RUN corepack enable
 COPY . .
 RUN pnpm install --frozen-lockfile
-RUN pnpm turbo run build --filter=@marketplace/api
+RUN MIGRATION_DATABASE_URL=postgresql://marketplace:build@127.0.0.1:5432/marketplace pnpm turbo run build --filter=@marketplace/api
 
 FROM node:24-alpine AS deps
 WORKDIR /app
@@ -19,6 +19,7 @@ RUN pnpm install --prod --frozen-lockfile --filter "@marketplace/api..."
 FROM node:24-alpine
 ENV NODE_ENV=production
 WORKDIR /app
+RUN mkdir -p /data/media /data/documents && chown -R node:node /data
 COPY --from=deps /app .
 COPY --from=build /repo/packages/contracts/dist packages/contracts/dist
 COPY --from=build /repo/packages/core/dist packages/core/dist
