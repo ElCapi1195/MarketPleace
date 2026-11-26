@@ -44,6 +44,7 @@ async function start(probes: HealthProbe[] = [ok('postgres'), ok('redis')]) {
     prisma: createPrisma('postgresql://nadie@127.0.0.1:1/nada'),
     mailer: { send: async () => {} },
     storage: memoryStorage(),
+    documents: memoryStorage(),
     vertical: loadVertical('demo'),
     auth: { publicUrl: 'https://market.test', secret: 'x'.repeat(48), brandName: 'Prueba', rateLimit: false },
   });

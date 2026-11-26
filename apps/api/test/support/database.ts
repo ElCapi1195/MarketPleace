@@ -29,7 +29,7 @@ function freePort(): Promise<number> {
 }
 
 /** Aplica las migraciones pendientes; el registro permite reutilizar una base persistente. */
-async function migrate(url: string): Promise<void> {
+export async function migrate(url: string): Promise<void> {
   const client = new Client({ connectionString: url });
   await client.connect();
   try {

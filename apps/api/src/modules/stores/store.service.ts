@@ -7,7 +7,7 @@ import { StoreRepository } from './store.repository.js';
 
 const view = ({ id, name }: StoreView): StoreView => ({ id, name });
 
-/** Alta mínima de tiendas. F2 añade la solicitud, los documentos y los miembros. */
+/** Tiendas que da de alta la administración, sin solicitud. */
 @Injectable()
 export class StoreService {
   constructor(
@@ -16,7 +16,7 @@ export class StoreService {
   ) {}
 
   async list(): Promise<StoreView[]> {
-    return (await this.stores.findAll()).map(view);
+    return (await this.stores.findApproved()).map(view);
   }
 
   async create(actor: ActorData, { name }: StoreInput): Promise<StoreView> {
@@ -24,7 +24,7 @@ export class StoreService {
     if (await this.stores.findBySlug(slug)) {
       throw new ConflictException({ code: 'STORE_EXISTS', message: 'Ya existe una tienda con ese nombre.' });
     }
-    const store = await this.stores.create({ slug, name });
+    const store = await this.stores.createApproved({ slug, name }, actor.actorId);
     await this.audit.record({ ...actor, action: 'store.created', targetType: 'store', targetId: store.id });
     return view(store);
   }

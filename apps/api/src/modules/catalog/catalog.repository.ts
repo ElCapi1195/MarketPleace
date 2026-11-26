@@ -2,7 +2,7 @@ import type { CatalogSort, ListingKind } from '@marketplace/contracts';
 import { Inject, Injectable } from '@nestjs/common';
 import { PRISMA, type Prisma } from '../../database/prisma.js';
 
-const visible = { status: 'PUBLISHED', store: { status: 'ACTIVE' } } as const;
+const visible = { status: 'PUBLISHED', store: { status: 'APPROVED' } } as const;
 const mediaOrder = [{ position: 'asc' }, { id: 'asc' }] as const;
 const include = () => ({ store: true, media: { orderBy: [...mediaOrder] } });
 

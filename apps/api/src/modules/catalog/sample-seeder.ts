@@ -3,6 +3,7 @@ import { SAMPLE_IMAGES, type SampleProduct } from '@marketplace/verticals/sample
 import type { MediaService } from '../media/media.service.js';
 import type { StoreService } from '../stores/store.service.js';
 import type { ProductService } from './product.service.js';
+import { PLATFORM } from './scope.js';
 
 const ACTOR = { actorId: 'semilla' };
 
@@ -22,24 +23,24 @@ export class SampleSeeder {
 
   /** Devuelve cuántos añadió; los que ya existen no se tocan. */
   async run(samples: readonly SampleProduct[], now: Date): Promise<number> {
-    const existing = new Set((await this.products.list(1)).items.map(({ slug }) => slug));
+    const existing = new Set((await this.products.list(PLATFORM, 1)).items.map(({ slug }) => slug));
     const pending = samples.filter(({ title }) => !existing.has(slugify(title)));
     for (const sample of pending) await this.add(sample, now);
     return pending.length;
   }
 
   private async add({ asset, monthsAhead, storeName, ...sample }: SampleProduct, now: Date): Promise<void> {
-    const { id } = await this.products.create(ACTOR, {
+    const { id } = await this.products.create(ACTOR, PLATFORM, {
       ...sample,
       storeId: await this.storeId(storeName),
       availableOn: monthsAhead === null ? null : arrival(now, monthsAhead),
     });
     for (let index = 1; index <= SAMPLE_IMAGES; index += 1) {
-      const { id: mediaId } = await this.media.add(ACTOR, id, 'IMAGE', await this.read(`${asset}-${index}.webp`));
-      await this.media.patch(mediaId, { alt: `${sample.title}, vista ${index}` });
+      const { id: mediaId } = await this.media.add(ACTOR, PLATFORM, id, 'IMAGE', await this.read(`${asset}-${index}.webp`));
+      await this.media.patch(PLATFORM, mediaId, { alt: `${sample.title}, vista ${index}` });
     }
-    await this.media.add(ACTOR, id, 'MODEL', await this.read(`${asset}.glb`));
-    await this.products.publish(ACTOR, id);
+    await this.media.add(ACTOR, PLATFORM, id, 'MODEL', await this.read(`${asset}.glb`));
+    await this.products.publish(ACTOR, PLATFORM, id);
   }
 
   private async storeId(name: string): Promise<string> {

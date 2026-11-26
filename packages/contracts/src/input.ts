@@ -1,9 +1,10 @@
 import { z } from 'zod';
+import { block, line } from './text.js';
 
 export const listingKinds = ['PREORDER', 'IN_STOCK', 'SERVICE'] as const;
 export type ListingKind = (typeof listingKinds)[number];
 
-export const productStatuses = ['DRAFT', 'PUBLISHED', 'ARCHIVED'] as const;
+export const productStatuses = ['DRAFT', 'PENDING_MODERATION', 'PUBLISHED', 'REJECTED', 'ARCHIVED'] as const;
 export type ProductStatus = (typeof productStatuses)[number];
 
 export const catalogSorts = ['recent', 'price_asc', 'price_desc', 'soonest'] as const;
@@ -18,15 +19,6 @@ export const MAX_MODEL_BYTES = 15 * 1024 * 1024;
 const MAX_MINOR = 2_000_000_000;
 const MAX_ATTRIBUTES = 40;
 const MAX_QUERY = 80;
-
-// El salto de línea solo tiene sentido en las descripciones.
-const line = (max: number) => z.string().trim().max(max).regex(/^\P{Cc}*$/u, 'caracteres no admitidos');
-const block = (max: number) =>
-  z
-    .string()
-    .trim()
-    .max(max)
-    .regex(/^(?:\P{Cc}|[\n\r\t])*$/u, 'caracteres no admitidos');
 
 const minor = z.number().int().min(0).max(MAX_MINOR);
 const slug = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(60);

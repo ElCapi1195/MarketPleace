@@ -28,10 +28,13 @@ const envSchema = z
     AUTH_SECRET: z.string().min(32, 'al menos 32 caracteres aleatorios'),
     // Volumen persistente y privado con los archivos subidos. Nunca dentro de lo que sirve la web.
     MEDIA_DIR: z.string().min(1),
+    // Documentos de las tiendas: datos personales, con su propio volumen y su propia retención.
+    DOCUMENTS_DIR: z.string().min(1),
     SMTP_URL: url(['smtp:', 'smtps:']).optional(),
     MAIL_FROM: z.string().min(3).default('no-responder@localhost'),
   })
-  .superRefine(({ NODE_ENV, PUBLIC_URL, SMTP_URL, AUTH_SECRET }, ctx) => {
+  .superRefine(({ NODE_ENV, PUBLIC_URL, SMTP_URL, AUTH_SECRET, MEDIA_DIR, DOCUMENTS_DIR }, ctx) => {
+    if (MEDIA_DIR === DOCUMENTS_DIR) ctx.addIssue({ code: 'custom', path: ['DOCUMENTS_DIR'], message: 'debe ser distinto de MEDIA_DIR' });
     if (NODE_ENV !== 'production') return;
     // Sin HTTPS no hay cookies seguras, y el correo por terminal expondría enlaces de acceso.
     if (!PUBLIC_URL.startsWith('https://')) ctx.addIssue({ code: 'custom', path: ['PUBLIC_URL'], message: 'debe usar https en producción' });

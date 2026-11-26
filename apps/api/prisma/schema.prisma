@@ -25,6 +25,7 @@ model User {
   sessions         Session[]
   accounts         Account[]
   twoFactors       TwoFactor[]
+  stores           StoreMember[]
 
   @@map("user")
 }
@@ -130,17 +131,87 @@ model AuditEvent {
   @@map("audit_event")
 }
 
-/// Tienda. F2 añade la verificación, los documentos y los miembros.
+/// Solo `name`, `slug` y `about` son públicos; lo demás sirve para verificarla.
 model Store {
-  id        String    @id @default(uuid(7)) @db.Uuid
-  slug      String    @unique
-  name      String
-  status    String    @default("ACTIVE")
-  createdAt DateTime  @default(now()) @db.Timestamptz(3)
-  updatedAt DateTime  @updatedAt @db.Timestamptz(3)
-  products  Product[]
+  id          String            @id @default(uuid(7)) @db.Uuid
+  slug        String            @unique
+  name        String
+  about       String            @default("")
+  legalName   String            @default("")
+  taxId       String            @default("")
+  phone       String            @default("")
+  address     String            @default("")
+  status      String            @default("DRAFT")
+  createdAt   DateTime          @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime          @updatedAt @db.Timestamptz(3)
+  products    Product[]
+  members     StoreMember[]
+  documents   StoreDocument[]
+  events      StoreEvent[]
+  invitations StoreInvitation[]
 
+  @@index([status, updatedAt])
   @@map("store")
+}
+
+model StoreMember {
+  storeId   String   @db.Uuid
+  userId    String
+  role      String
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  store     Store    @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@id([storeId, userId])
+  @@index([userId])
+  @@map("store_member")
+}
+
+/// Documento de verificación. El id, aleatorio, es su clave en el almacén privado.
+model StoreDocument {
+  id         String   @id @db.Uuid
+  storeId    String   @db.Uuid
+  key        String
+  type       String
+  bytes      Int
+  uploadedBy String
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+  store      Store    @relation(fields: [storeId], references: [id], onDelete: Restrict)
+
+  @@unique([storeId, key])
+  @@map("store_document")
+}
+
+/// Historial de decisiones. Solo inserción: lo impone la base de datos.
+model StoreEvent {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  storeId    String   @db.Uuid
+  at         DateTime @default(now()) @db.Timestamptz(3)
+  action     String
+  fromStatus String
+  toStatus   String
+  reason     String   @default("")
+  actorId    String
+  store      Store    @relation(fields: [storeId], references: [id], onDelete: Restrict)
+
+  @@index([storeId, at])
+  @@map("store_event")
+}
+
+/// Guarda el hash del token, nunca el token.
+model StoreInvitation {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  storeId   String   @db.Uuid
+  email     String
+  role      String
+  tokenHash String   @unique @db.Char(64)
+  invitedBy String
+  expiresAt DateTime @db.Timestamptz(3)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  store     Store    @relation(fields: [storeId], references: [id], onDelete: Restrict)
+
+  @@unique([storeId, email])
+  @@map("store_invitation")
 }
 
 model Product {
@@ -160,6 +231,8 @@ model Product {
   status       String         @default("DRAFT")
   /// Texto plegado (sin tildes ni signos) para buscar.
   searchText   String
+  /// Motivo del último rechazo en moderación.
+  rejection    String         @default("")
   version      Int            @default(1)
   createdBy    String?
   publishedAt  DateTime?      @db.Timestamptz(3)

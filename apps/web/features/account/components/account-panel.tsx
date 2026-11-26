@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { get, post } from '@/lib/client-api';
 import { messageFor } from '../lib/messages';
@@ -107,6 +108,9 @@ export function AccountPanel() {
 
   return (
     <Screen title={`Hola, ${me.name}`} intro={<span className="break-all">{me.email}</span>}>
+      <Link href="/tienda" className="self-start py-2 font-bold underline">
+        Mis tiendas
+      </Link>
       <TwoFactorSetup enabled={me.twoFactorEnabled} required={me.twoFactorRequired} onChange={load} />
       <Sessions />
       <PasswordForm />

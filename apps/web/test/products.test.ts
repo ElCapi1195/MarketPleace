@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { checkFile } from '../features/admin/lib/files';
-import { adminMessage } from '../features/admin/lib/messages';
-import { emptyValues, toInput, toValues, type FormContext } from '../features/admin/lib/product-form';
+import { checkFile } from '../features/products/lib/files';
+import { apiMessage } from '../features/shared/lib/messages';
+import { emptyValues, toInput, toValues, type FormContext } from '../features/products/lib/product-form';
 
 const context: FormContext = {
   currency: 'USD',
@@ -108,12 +108,12 @@ describe('checkFile', () => {
   });
 });
 
-describe('adminMessage', () => {
+describe('apiMessage', () => {
   it('usa el texto del servidor cuando está escrito para personas', () => {
-    expect(adminMessage({ ok: false, status: 422, code: 'INVALID_MODEL', message: 'El modelo 3D no se puede usar: está incompleto.' })).toContain('incompleto');
+    expect(apiMessage({ ok: false, status: 422, code: 'INVALID_MODEL', message: 'El modelo 3D no se puede usar: está incompleto.' })).toContain('incompleto');
   });
 
   it('no muestra textos internos', () => {
-    expect(adminMessage({ ok: false, status: 500, code: 'INTERNAL_ERROR', message: 'stack' })).not.toContain('stack');
+    expect(apiMessage({ ok: false, status: 500, code: 'INTERNAL_ERROR', message: 'stack' })).not.toContain('stack');
   });
 });

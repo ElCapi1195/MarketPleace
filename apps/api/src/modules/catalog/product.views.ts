@@ -54,6 +54,7 @@ export function adminView(row: ProductRow): AdminProduct {
     availableOn: dateOnly(row.availableOn),
     attributes: attributesOf(row),
     featured: row.featured,
+    rejection: row.rejection,
     media: row.media.map(mediaView),
     updatedAt: row.updatedAt.toISOString(),
   };

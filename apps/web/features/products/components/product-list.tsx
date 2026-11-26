@@ -3,10 +3,10 @@
 import type { AdminProduct } from '@marketplace/contracts';
 import Link from 'next/link';
 import { useState } from 'react';
-import { adminMediaUrl } from '@/features/catalog/lib/media';
+import { privateMediaUrl } from '@/features/catalog/lib/media';
 import { formatMoney } from '@/features/catalog/lib/money';
-import { AdminGate, useAdmin } from './admin-gate';
-import { statusLabel } from './status';
+import { ResourceGate, useResource } from '@/features/shared/components/resource';
+import { statusLabel } from '../lib/status';
 
 interface Page {
   items: AdminProduct[];
@@ -15,13 +15,25 @@ interface Page {
   pageSize: number;
 }
 
-function Row({ product, currency, locale }: { product: AdminProduct; currency: string; locale: string }) {
+interface ListProps {
+  /** Dirección de la lista, si no es `<base>/products`. */
+  list?: string;
+  empty?: string;
+  /** Raíz de la API. */
+  base: string;
+  /** Dirección de las páginas de producto. */
+  path: string;
+  currency: string;
+  locale: string;
+}
+
+function Row({ product, base, path, currency, locale }: ListProps & { product: AdminProduct }) {
   const cover = product.media.find(({ kind }) => kind === 'IMAGE');
   return (
     <li className="group relative flex items-center gap-4 border-b-2 border-surface py-3">
-      <span className="size-18 shrink-0 overflow-hidden rounded-xl bg-surface">{cover && <img src={adminMediaUrl(cover, 'sm')} alt="" loading="lazy" className="size-full object-cover" />}</span>
+      <span className="size-18 shrink-0 overflow-hidden rounded-xl bg-surface">{cover && <img src={privateMediaUrl(base, cover, 'sm')} alt="" loading="lazy" className="size-full object-cover" />}</span>
       <span className="min-w-0 flex-1">
-        <Link href={`/admin/productos/${product.id}`} className="block truncate font-bold after:absolute after:inset-0 group-hover:underline">
+        <Link href={`${path}/${product.id}`} className="block truncate font-bold after:absolute after:inset-0 group-hover:underline">
           {product.title}
         </Link>
         <span className="text-sm">{product.store.name}</span>
@@ -32,19 +44,19 @@ function Row({ product, currency, locale }: { product: AdminProduct; currency: s
   );
 }
 
-export function ProductList({ currency, locale }: { currency: string; locale: string }) {
+export function ProductList(props: ListProps) {
   const [page, setPage] = useState(1);
-  const { result } = useAdmin<Page>(`/api/admin/products?page=${page}`);
+  const { result } = useResource<Page>(`${props.list ?? `${props.base}/products`}?page=${page}`);
   return (
-    <AdminGate result={result}>
+    <ResourceGate result={result}>
       {({ items, total, pageSize }) =>
         total === 0 ? (
-          <p className="text-lg">Todavía no hay productos. Crea el primero.</p>
+          <p className="text-lg">{props.empty ?? 'Todavía no hay productos. Crea el primero.'}</p>
         ) : (
           <>
             <ul>
               {items.map((product) => (
-                <Row key={product.id} product={product} currency={currency} locale={locale} />
+                <Row key={product.id} product={product} {...props} />
               ))}
             </ul>
             {total > pageSize && (
@@ -60,6 +72,6 @@ export function ProductList({ currency, locale }: { currency: string; locale: st
           </>
         )
       }
-    </AdminGate>
+    </ResourceGate>
   );
 }

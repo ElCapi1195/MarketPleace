@@ -63,6 +63,7 @@ export interface TestIdentity {
   prisma: Prisma;
   mailer: FakeMailer;
   storage: MemoryStorage;
+  documents: MemoryStorage;
   browser(): Browser;
   /** Crea una cuenta verificada y devuelve su email. */
   account(role?: string): Promise<string>;
@@ -77,6 +78,7 @@ export async function startIdentity(appUrl: string, overrides: Partial<AppOption
   const prisma = createPrisma(appUrl);
   const mailer = new FakeMailer();
   const storage = memoryStorage();
+  const documents = memoryStorage();
   const app = await createApp({
     probes: [],
     trustProxyHops: 1,
@@ -84,6 +86,7 @@ export async function startIdentity(appUrl: string, overrides: Partial<AppOption
     prisma,
     mailer,
     storage,
+    documents,
     vertical: loadVertical('gamer'),
     auth: { publicUrl: ORIGIN, secret: 'x'.repeat(48), brandName: 'Mercado de Prueba', rateLimit: false },
     ...overrides,
@@ -103,6 +106,7 @@ export async function startIdentity(appUrl: string, overrides: Partial<AppOption
     prisma,
     mailer,
     storage,
+    documents,
     browser,
     account,
     signedIn: async (role = 'customer', twoFactor = role !== 'customer') => {

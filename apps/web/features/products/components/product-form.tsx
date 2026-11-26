@@ -3,9 +3,9 @@
 import type { ProductInput, StoreView } from '@marketplace/contracts';
 import { useState, type FormEvent } from 'react';
 import { post } from '@/lib/client-api';
-import { adminMessage } from '../lib/messages';
+import { apiMessage } from '@/features/shared/lib/messages';
 import { toInput, type FormAttribute, type FormContext, type Values } from '../lib/product-form';
-import { CheckField, SelectField, TextArea, TextField } from './fields';
+import { CheckField, SelectField, TextArea, TextField } from '@/features/shared/components/fields';
 
 interface ProductFormProps {
   context: FormContext;
@@ -15,7 +15,8 @@ interface ProductFormProps {
   submitLabel: string;
   /** Devuelve el error para la persona, o null si se guardó. */
   onSave: (input: ProductInput) => Promise<string | null>;
-  onStoreCreated: () => Promise<void>;
+  /** Solo la plataforma elige tienda, crea tiendas y destaca. */
+  onStoreCreated?: () => Promise<void>;
 }
 
 function NewStore({ onCreated }: { onCreated: (store: StoreView) => Promise<void> }) {
@@ -27,7 +28,7 @@ function NewStore({ onCreated }: { onCreated: (store: StoreView) => Promise<void
       setName('');
       setError(null);
       await onCreated(result.data);
-    } else setError(adminMessage(result));
+    } else setError(apiMessage(result));
   };
   return (
     <details className="sm:col-span-2">
@@ -83,14 +84,18 @@ export function ProductForm({ context, kinds, stores, initial, submitLabel, onSa
       )}
       {category?.attributes.map((attribute) => <Attribute key={attribute.key} attribute={attribute} {...bind(`attributes.${attribute.key}`)} />)}
       <TextArea label="Descripción" wide {...bind('description')} maxLength={4000} />
-      <SelectField label="Tienda" {...bind('storeId')} options={stores.map(({ id, name }) => ({ value: id, label: name }))} placeholder="Elige" />
-      <CheckField label="Destacar en la portada" {...bind('featured')} />
-      <NewStore
-        onCreated={async ({ id }) => {
-          await onStoreCreated();
-          bind('storeId').onChange(id);
-        }}
-      />
+      {onStoreCreated && (
+        <>
+          <SelectField label="Tienda" {...bind('storeId')} options={stores.map(({ id, name }) => ({ value: id, label: name }))} placeholder="Elige" />
+          <CheckField label="Destacar en la portada" {...bind('featured')} />
+          <NewStore
+            onCreated={async ({ id }) => {
+              await onStoreCreated();
+              bind('storeId').onChange(id);
+            }}
+          />
+        </>
+      )}
       {error && (
         <p role="alert" className="rounded-xl border-2 border-ink p-3 font-medium sm:col-span-2">
           {error}

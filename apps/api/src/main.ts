@@ -16,6 +16,7 @@ async function main(): Promise<void> {
     prisma: createPrisma(env.DATABASE_URL),
     mailer: env.SMTP_URL ? smtpMailer(env.SMTP_URL, env.MAIL_FROM) : consoleMailer(),
     storage: diskStorage(env.MEDIA_DIR),
+    documents: diskStorage(env.DOCUMENTS_DIR),
     vertical,
     auth: {
       publicUrl: env.PUBLIC_URL,

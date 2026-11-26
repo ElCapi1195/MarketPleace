@@ -41,13 +41,19 @@ Con rol `admin` y el segundo paso activo, `/admin/productos` permite crear produ
 
 Los equipos de ejemplo son modelos originales. Para regenerarlos (necesita Chrome): `node tools/sample-models/generate.mjs`
 
+## Tiendas
+
+`/vender` explica el alta y `/tienda` reúne las tiendas propias. Quien solicita completa sus datos y documentos (los exige el nicho) y envía; un `moderator` o `admin` decide en `/admin/tiendas`, y los productos de las tiendas se aprueban en `/admin/moderacion`. Solo `admin` suspende. Todo el personal necesita el segundo paso.
+
+Decisiones: [ADR 0004](docs/adr/0004-tiendas-y-alcance.md).
+
 ## Despliegue
 
 Lo gestiona Codex. `deploy/` y `.forgejo/workflows/` son borradores: solo se validó la sintaxis de `compose.yaml`; las imágenes no se han construido ni desplegado. Pendiente de incorporar ahí desde F1:
 
 - `prisma generate` en la imagen de la API.
 - Antes de migrar, crear el rol `marketplace_app` (sin propiedad ni DDL) y usarlo en `DATABASE_URL`. Las migraciones (`prisma migrate deploy`) usan el propietario en `MIGRATION_DATABASE_URL`.
-- Variables nuevas de la API: `PUBLIC_URL` (https), `AUTH_SECRET` (aleatorio, ≥ 32), `SMTP_URL`, `MAIL_FROM`, `MEDIA_DIR` (volumen persistente y privado).
+- Variables nuevas de la API: `PUBLIC_URL` (https), `AUTH_SECRET` (aleatorio, ≥ 32), `SMTP_URL`, `MAIL_FROM`, `MEDIA_DIR` y `DOCUMENTS_DIR` (volúmenes persistentes, privados y distintos).
 - Web: `API_INTERNAL_URL`, la dirección interna de la API (por ejemplo `http://api:3001`). Sin ella, la web no arranca.
 - `MEDIA_DIR` se respalda junto con la base: una sin la otra deja productos sin fotos.
 - El proxy debe admitir cuerpos de 15 MB en `/api`.

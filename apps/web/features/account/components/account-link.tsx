@@ -12,6 +12,12 @@ interface Session {
 
 const link = 'py-2 font-medium hover:underline';
 
+/** Primera pantalla de administración que su rol puede usar. */
+function adminHome(role: string): string | null {
+  if (can(role, 'catalog.manage')) return '/admin/productos';
+  return can(role, 'store.verify') ? '/admin/tiendas' : null;
+}
+
 /** Enlaces de la cabecera. Mientras no se sabe si hay sesión, lleva a entrar, que siempre es válido. */
 export function AccountLink() {
   const pathname = usePathname();
@@ -27,11 +33,12 @@ export function AccountLink() {
     };
   }, [pathname]);
 
+  // Solo decide qué enlace se ve: el permiso real lo comprueba la API.
+  const admin = adminHome(session?.user.platformRole ?? '');
   return (
     <span className="flex gap-5">
-      {/* Solo decide qué enlace se ve: el permiso real lo comprueba la API. */}
-      {can(session?.user.platformRole ?? '', 'catalog.manage') && (
-        <Link href="/admin/productos" className={link}>
+      {admin && (
+        <Link href={admin} className={link}>
           Administrar
         </Link>
       )}

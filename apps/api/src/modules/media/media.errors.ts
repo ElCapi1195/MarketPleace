@@ -5,6 +5,9 @@ const reject = (status: HttpStatus, code: string, message: string) => new HttpEx
 export const unsupportedImage = () =>
   reject(HttpStatus.UNSUPPORTED_MEDIA_TYPE, 'UNSUPPORTED_IMAGE', 'La foto no es un JPEG, PNG o WebP válido.');
 
+export const unsupportedDocument = () =>
+  reject(HttpStatus.UNSUPPORTED_MEDIA_TYPE, 'UNSUPPORTED_DOCUMENT', 'El PDF no es válido o tiene contenido activo.');
+
 export const imageTooLarge = () =>
   reject(HttpStatus.UNPROCESSABLE_ENTITY, 'IMAGE_TOO_LARGE', 'La foto supera los 40 megapíxeles.');
 

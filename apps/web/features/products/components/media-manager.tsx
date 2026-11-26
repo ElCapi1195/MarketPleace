@@ -4,12 +4,14 @@ import type { AdminProduct, MediaView } from '@marketplace/contracts';
 import { imageTypes } from '@marketplace/contracts';
 import { useRef, useState, type DragEvent } from 'react';
 import { ModelViewer } from '@/features/catalog/components/model-viewer';
-import { adminMediaUrl } from '@/features/catalog/lib/media';
+import { privateMediaUrl } from '@/features/catalog/lib/media';
 import { patch, remove, upload } from '@/lib/client-api';
 import { checkFile } from '../lib/files';
-import { adminMessage } from '../lib/messages';
+import { apiMessage } from '@/features/shared/lib/messages';
 
 interface MediaManagerProps {
+  /** Raíz de la API: la plataforma o una tienda. */
+  base: string;
   product: AdminProduct;
   maxImages: number;
   onChange: () => Promise<void>;
@@ -17,16 +19,16 @@ interface MediaManagerProps {
 
 const small = 'min-h-11 cursor-pointer rounded-lg border-2 border-ink px-3 font-bold disabled:cursor-not-allowed disabled:opacity-40';
 
-function ImageItem({ image, index, count, run }: { image: MediaView; index: number; count: number; run: (task: () => Promise<string | null>) => void }) {
+function ImageItem({ base, image, index, count, run }: { base: string; image: MediaView; index: number; count: number; run: (task: () => Promise<string | null>) => void }) {
   const save = (changes: object) =>
     run(async () => {
-      const result = await patch(`/api/admin/media/${image.id}`, changes);
-      return result.ok ? null : adminMessage(result);
+      const result = await patch(`${base}/media/${image.id}`, changes);
+      return result.ok ? null : apiMessage(result);
     });
   return (
     <li className="flex flex-col gap-2">
       <div className="relative aspect-4/3 overflow-hidden rounded-2xl bg-surface">
-        <img src={adminMediaUrl(image, 'sm')} alt={image.alt} className="size-full object-cover" />
+        <img src={privateMediaUrl(base, image, 'sm')} alt={image.alt} className="size-full object-cover" />
         {index === 0 && <span className="absolute top-2 left-2 rounded-lg bg-accent px-2 py-0.5 text-sm font-bold text-ink">Portada</span>}
       </div>
       <input
@@ -49,8 +51,8 @@ function ImageItem({ image, index, count, run }: { image: MediaView; index: numb
           aria-label={`Eliminar la foto ${index + 1}`}
           onClick={() =>
             run(async () => {
-              const result = await remove(`/api/admin/media/${image.id}`);
-              return result.ok ? null : adminMessage(result);
+              const result = await remove(`${base}/media/${image.id}`);
+              return result.ok ? null : apiMessage(result);
             })
           }
           className={`${small} ml-auto`}
@@ -63,7 +65,7 @@ function ImageItem({ image, index, count, run }: { image: MediaView; index: numb
 }
 
 /** Fotos y modelo 3D de un producto: subir, ordenar, describir y eliminar. */
-export function MediaManager({ product, maxImages, onChange }: MediaManagerProps) {
+export function MediaManager({ base, product, maxImages, onChange }: MediaManagerProps) {
   const [errors, setErrors] = useState<string[]>([]);
   const [pending, setPending] = useState<string | null>(null);
   const [over, setOver] = useState(false);
@@ -88,8 +90,8 @@ export function MediaManager({ product, maxImages, onChange }: MediaManagerProps
         continue;
       }
       setPending(`Subiendo ${file.name} (${index + 1} de ${files.length})…`);
-      const result = await upload(`/api/admin/products/${product.id}/media`, file, check.type);
-      if (!result.ok) problems.push(`${file.name}: ${adminMessage(result)}`);
+      const result = await upload(`${base}/products/${product.id}/media`, file, check.type);
+      if (!result.ok) problems.push(`${file.name}: ${apiMessage(result)}`);
       await onChange();
     }
     setPending(null);
@@ -150,7 +152,7 @@ export function MediaManager({ product, maxImages, onChange }: MediaManagerProps
       {images.length > 0 && (
         <ul className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {images.map((image, index) => (
-            <ImageItem key={image.id} image={image} index={index} count={images.length} run={run} />
+            <ImageItem key={image.id} base={base} image={image} index={index} count={images.length} run={run} />
           ))}
         </ul>
       )}
@@ -158,14 +160,14 @@ export function MediaManager({ product, maxImages, onChange }: MediaManagerProps
         <div className="flex flex-col gap-3">
           <h3 className="text-lg font-bold">Modelo 3D</h3>
           <div className="aspect-4/3 overflow-hidden rounded-3xl bg-surface">
-            <ModelViewer key={model.id} url={adminMediaUrl(model, 'model')} label={product.title} />
+            <ModelViewer key={model.id} url={privateMediaUrl(base, model, 'model')} label={product.title} />
           </div>
           <button
             type="button"
             onClick={() =>
               run(async () => {
-                const result = await remove(`/api/admin/media/${model.id}`);
-                return result.ok ? null : adminMessage(result);
+                const result = await remove(`${base}/media/${model.id}`);
+                return result.ok ? null : apiMessage(result);
               })
             }
             className={`${small} self-start`}

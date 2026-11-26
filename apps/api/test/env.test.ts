@@ -9,6 +9,7 @@ const valid = {
   PUBLIC_URL: 'https://market.test',
   AUTH_SECRET: 'k'.repeat(48),
   MEDIA_DIR: '/data/media',
+  DOCUMENTS_DIR: '/data/documents',
   SMTP_URL: 'smtp://correo.test:587',
 };
 
@@ -17,8 +18,12 @@ describe('parseEnv', () => {
     expect(parseEnv(valid)).toMatchObject({ HOST: '0.0.0.0', PORT: 3001, TRUST_PROXY_HOPS: 1, VERTICAL: 'demo' });
   });
 
-  it.each(['VERTICAL', 'DATABASE_URL', 'REDIS_URL', 'NODE_ENV', 'PUBLIC_URL', 'AUTH_SECRET', 'MEDIA_DIR', 'SMTP_URL'])('exige %s', (key) => {
+  it.each(['VERTICAL', 'DATABASE_URL', 'REDIS_URL', 'NODE_ENV', 'PUBLIC_URL', 'AUTH_SECRET', 'MEDIA_DIR', 'DOCUMENTS_DIR', 'SMTP_URL'])('exige %s', (key) => {
     expect(() => parseEnv({ ...valid, [key]: undefined })).toThrow(key);
+  });
+
+  it('no mezcla los documentos con los archivos públicos', () => {
+    expect(() => parseEnv({ ...valid, DOCUMENTS_DIR: valid.MEDIA_DIR })).toThrow(/DOCUMENTS_DIR/);
   });
 
   it('rechaza un nicho desconocido', () => {

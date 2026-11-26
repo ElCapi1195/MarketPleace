@@ -73,6 +73,8 @@ export interface AdminProduct {
   availableOn: string | null;
   attributes: Record<string, string | number | boolean>;
   featured: boolean;
+  /** Motivo del último rechazo en moderación. */
+  rejection: string;
   media: MediaView[];
   updatedAt: string;
 }

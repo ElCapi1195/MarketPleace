@@ -21,12 +21,18 @@ Objetivo: OWASP ASVS nivel 2. Se revisa al cerrar cada fase.
 | Redirección abierta | Destinos internos en web y API | F1 | Hecho |
 | Acceso a función olvidada | Guard global que deniega por defecto | F1 | Hecho |
 | Borrar huellas | Rol de BD sin privilegios y triggers de solo inserción | F1 | Hecho |
-| Acceso entre tiendas | `storeId` obligatorio + matriz de pruebas | F2–F4 | `storeId` listo; hoy solo publica la administración |
+| Acceso entre tiendas | `Scope` obligatorio, 404 a lo ajeno y matriz de pruebas | F2–F4 | Hecho en tiendas, productos, archivos, documentos y equipo; reservas en F4 |
 | Fotos maliciosas | Firma real, 40 Mpx, recodificar sin EXIF, tipo fijado por el servidor, `nosniff` | F3 | Hecho |
 | Modelos 3D maliciosos | Estructura, ciclos, límites y texturas validados; sin recursos externos; sin extensiones desconocidas | F3 | Hecho |
 | Agotar memoria subiendo | Autorizar antes de leer, tope de 10 y 15 MB | F3 | Hecho |
 | Ver borradores por su id | Los archivos comprueban el estado del producto y la tienda en cada petición | F3 | Hecho |
-| Documentos de tiendas | Volumen privado, descarga forzada, auditados | F2 | Pendiente |
+| Documentos de tiendas | Volumen propio, recodificados o comprobados, descarga forzada, consultas auditadas | F2 | Hecho |
+| Tienda falsa | Verificación con documentos, motivo e historial inmutable | F2 | Hecho |
+| Revisor juez y parte | Nadie decide sobre su tienda ni sus productos | F2 | Hecho |
+| Cambiazo tras aprobar | Vuelta a moderación y decisión ligada a la versión vista | F2 | Hecho |
+| Invitación robada o reutilizada | Ligada al correo, un uso, 7 días, hash | F2 | Hecho |
+| Tienda sin dueño | Último propietario protegido con bloqueo de fila | F2 | Hecho |
+| Usar la web para enviar spam | Solo tiendas verificadas invitan; máximo 20 pendientes | F2 | Hecho |
 | Sobreventa por concurrencia | Bloqueo de fila y versión al aprobar | F4 | Pendiente |
 | Depósito inventado o alterado | Registro solo-inserción con autor y reverso | F4 | Pendiente |
 | Abuso de administrador | Motivo obligatorio y auditoría | F5 | Pendiente |
@@ -40,4 +46,8 @@ Objetivo: OWASP ASVS nivel 2. Se revisa al cerrar cada fase.
 - **Catálogo público sin límite por IP:** las lecturas son baratas y paginadas, pero falta un límite propio o del proxy (F6).
 - **Fotos archivadas:** un navegador puede conservar hasta un día la copia que ya descargó.
 - **Archivos huérfanos:** un corte durante la subida puede dejar un archivo sin fila; no es accesible. Limpieza en F6.
+- **PDF con contenido oculto:** lo que vaya en flujos comprimidos no se detecta. Se descargan y conviene abrirlos con un visor actualizado; analizarlos con antivirus queda para F6.
+- **Retención de documentos:** no se borran solos tras decidir. Falta el proceso en segundo plano (F6). El cifrado en reposo depende del volumen.
+- **Segundo paso desactivado:** quien lo quite pierde el acceso a su tienda hasta reactivarlo.
+- **Suplantar una marca en el nombre de la tienda:** lo detecta quien revisa, no la web.
 - **Cuentas sin verificar:** no caducan todavía (F6).

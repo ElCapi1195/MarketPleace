@@ -6,6 +6,7 @@ export const permissions = [
   'catalog.manage',
   'listing.moderate',
   'reservation.intervene',
+  'store.suspend',
   'store.verify',
   'user.suspend',
 ] as const;

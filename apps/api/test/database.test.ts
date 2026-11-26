@@ -116,3 +116,34 @@ describe('catálogo', () => {
     await expect(app.query(sql)).rejects.toMatchObject({ code: DENIED });
   });
 });
+
+describe('tiendas', () => {
+  const store = (data: object = {}) => prisma.store.create({ data: { slug: randomUUID(), name: 'Tienda', ...data } });
+
+  it.each([
+    [{ status: 'ACTIVE' }, /status_check/],
+    [{ status: 'SUBMITTED' }, /complete_check/],
+    [{ status: 'IN_REVIEW', legalName: 'a', taxId: 'b', phone: 'c' }, /complete_check/],
+  ])('rechaza %j', async (data, error) => {
+    await expect(store(data)).rejects.toThrow(error);
+  });
+
+  it('el historial de decisiones no se puede reescribir', async () => {
+    const { id: storeId } = await store();
+    await prisma.storeEvent.create({ data: { storeId, action: 'submit', fromStatus: 'DRAFT', toStatus: 'SUBMITTED', actorId: 'x' } });
+    for (const client of [app, owner]) {
+      for (const sql of [`UPDATE store_event SET reason = 'x'`, 'DELETE FROM store_event', 'TRUNCATE store_event']) {
+        await expect(client.query(sql)).rejects.toMatchObject({ code: DENIED });
+      }
+    }
+  });
+
+  it('no se puede borrar a una persona que pertenece a una tienda', async () => {
+    const { id: storeId } = await store();
+    const id = randomUUID();
+    await prisma.user.create({ data: { id, name: 'P', email: `${id}@example.test` } });
+    await prisma.storeMember.create({ data: { storeId, userId: id, role: 'OWNER' } });
+    await expect(prisma.user.delete({ where: { id } })).rejects.toThrow();
+    await expect(prisma.storeMember.update({ where: { storeId_userId: { storeId, userId: id } }, data: { role: 'ADMIN' } })).rejects.toThrow(/role_check/);
+  });
+});

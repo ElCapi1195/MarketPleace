@@ -3,7 +3,7 @@ import { mkdir, rm, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { Readable } from 'node:stream';
 
-export const variants = ['lg', 'sm', 'model'] as const;
+export const variants = ['lg', 'sm', 'model', 'doc'] as const;
 export type Variant = (typeof variants)[number];
 
 export interface StoredFile {

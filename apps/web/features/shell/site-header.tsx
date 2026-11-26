@@ -32,7 +32,7 @@ export function SiteHeader({ showSampleNotice }: { showSampleNotice: boolean }) 
       {showSampleNotice && (
         <p className="bg-accent px-4 py-1.5 text-center text-sm font-medium text-ink">Vista de desarrollo: incluye productos y tiendas ficticios.</p>
       )}
-      <header className="mx-auto max-w-7xl px-4 pt-4 sm:px-6">
+      <header className="mx-auto w-full max-w-7xl px-4 pt-4 sm:px-6">
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
           <Link href="/" className="py-2 font-display text-lg font-extrabold sm:text-xl">
             {brand.name}
