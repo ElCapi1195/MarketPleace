@@ -24,6 +24,7 @@ COPY --from=deps /app .
 COPY --from=build /repo/packages/contracts/dist packages/contracts/dist
 COPY --from=build /repo/packages/core/dist packages/core/dist
 COPY --from=build /repo/packages/verticals/dist packages/verticals/dist
+COPY --from=build /repo/packages/verticals/assets packages/verticals/assets
 COPY --from=build /repo/apps/api/dist apps/api/dist
 USER node
 EXPOSE 3001
