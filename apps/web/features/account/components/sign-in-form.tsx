@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { withBasePath } from '@/lib/base-path';
 import { post } from '@/lib/client-api';
 import { messageFor } from '../lib/messages';
 import { Field, Form } from './form';
@@ -20,11 +21,11 @@ export function SignInForm({ next }: { next: string }) {
       return;
     }
     // Navegación completa: descarta el estado de la sesión anterior.
-    window.location.assign(result.data.twoFactorRedirect ? `/segundo-paso?siguiente=${encodeURIComponent(next)}` : next);
+    window.location.assign(withBasePath(result.data.twoFactorRedirect ? `/segundo-paso?siguiente=${encodeURIComponent(next)}` : next));
   };
 
   const resend = async () => {
-    await post('/api/auth/send-verification-email', { email: unverified, callbackURL: '/entrar?verificado=1' });
+    await post('/api/auth/send-verification-email', { email: unverified, callbackURL: withBasePath('/entrar?verificado=1') });
     setResent(true);
   };
 

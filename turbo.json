@@ -12,7 +12,8 @@
         "!.next/cache/**"
       ],
       "env": [
-        "VERTICAL"
+        "VERTICAL",
+        "NEXT_PUBLIC_BASE_PATH"
       ]
     },
     "typecheck": {

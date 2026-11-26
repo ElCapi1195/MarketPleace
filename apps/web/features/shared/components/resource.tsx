@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { withBasePath } from '@/lib/base-path';
 import { get, type ApiResult } from '@/lib/client-api';
 import { apiMessage } from '../lib/messages';
 
@@ -16,7 +17,7 @@ export function useResource<T>(path: string): { result: Loaded<T>; reload: () =>
     const response = await get<T>(path);
     if (response.ok) setResult({ state: 'ready', data: response.data });
     else if (response.status === 401) {
-      window.location.replace(`/entrar?siguiente=${encodeURIComponent(window.location.pathname)}`);
+      window.location.replace(withBasePath(`/entrar?siguiente=${encodeURIComponent(window.location.pathname)}`));
     } else setResult({ state: 'error', failure: response });
   }, [path]);
   useEffect(() => {

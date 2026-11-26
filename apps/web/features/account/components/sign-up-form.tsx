@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { withBasePath } from '@/lib/base-path';
 import { post } from '@/lib/client-api';
 import { messageFor } from '../lib/messages';
 import { Field, Form } from './form';
@@ -11,7 +12,7 @@ export function SignUpForm() {
 
   const signUp = async ({ name = '', email = '', password = '' }: Record<string, string>) => {
     setError(null);
-    const result = await post('/api/auth/sign-up/email', { name, email, password, callbackURL: '/entrar?verificado=1' });
+    const result = await post('/api/auth/sign-up/email', { name, email, password, callbackURL: withBasePath('/entrar?verificado=1') });
     if (result.ok) setSentTo(email);
     else setError(messageFor(result.code, result.message));
   };

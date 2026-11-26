@@ -6,6 +6,7 @@ import { useRef, useState, type FormEvent } from 'react';
 import { TextArea, TextField } from '@/features/shared/components/fields';
 import { ResourceGate, useResource } from '@/features/shared/components/resource';
 import { apiMessage } from '@/features/shared/lib/messages';
+import { withBasePath } from '@/lib/base-path';
 import { post } from '@/lib/client-api';
 
 interface RequestFormProps {
@@ -32,7 +33,7 @@ function Form({ slug, expected, conditions }: RequestFormProps) {
     const body = { productSlug: slug, expected, termsVersion: conditions.version, phone, note };
     const result = await post<CustomerReservation>('/api/reservations', body, { 'idempotency-key': key.current });
     if (result.ok) {
-      window.location.assign(`/reservas/${result.data.id}`);
+      window.location.assign(withBasePath(`/reservas/${result.data.id}`));
       return;
     }
     setError({ text: apiMessage(result), code: result.code });
@@ -55,7 +56,7 @@ function Form({ slug, expected, conditions }: RequestFormProps) {
         <p role="alert" className="rounded-xl border-2 border-ink p-3 font-medium">
           {error.text}{' '}
           {(error.code === 'PRODUCT_CHANGED' || error.code === 'TERMS_CHANGED') && (
-            <a href={`/producto/${slug}`} className="font-bold underline">
+            <a href={withBasePath(`/producto/${slug}`)} className="font-bold underline">
               Ver el producto
             </a>
           )}

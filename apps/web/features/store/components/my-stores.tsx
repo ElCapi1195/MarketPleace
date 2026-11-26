@@ -4,6 +4,7 @@ import type { StoreDetail, StoreSummary } from '@marketplace/contracts';
 import Link from 'next/link';
 import { ResourceGate, useResource } from '@/features/shared/components/resource';
 import { apiMessage } from '@/features/shared/lib/messages';
+import { withBasePath } from '@/lib/base-path';
 import { post } from '@/lib/client-api';
 import { roleLabel, storeStatusLabel } from '../lib/status';
 import { ApplicationForm, emptyApplication } from './application-form';
@@ -56,7 +57,7 @@ export function NewStoreApplication() {
             onSave={async (input) => {
               const response = await post<StoreDetail>('/api/stores', input);
               if (!response.ok) return apiMessage(response);
-              window.location.assign(`/tienda/${response.data.id}`);
+              window.location.assign(withBasePath(`/tienda/${response.data.id}`));
               return null;
             }}
           />

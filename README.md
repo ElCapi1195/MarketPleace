@@ -71,6 +71,8 @@ En Dokploy crea un servicio Compose enlazado al repositorio, rama `main` y archi
 
 En **Domains**, dirige el dominio HTTPS a `web:3000` y `/api` a `api:3001`. El proxy debe permitir cuerpos de hasta 15 MB para `/api`. `TRUST_PROXY_HOPS` debe coincidir con los saltos reales del proxy para que los límites por IP sean correctos.
 
+Para servir la app bajo una ruta de un sitio existente, define `NEXT_PUBLIC_BASE_PATH=/marketpleace` en Dokploy antes de construir. Configura `PUBLIC_URL=https://nexleveldigital.dev/marketpleace` y haz que el proxy quite `/marketpleace/` antes de reenviar la solicitud a `preview:8080`; ese servicio conserva el enrutado de `/api` hacia la API. El base path se compila en Next.js, así que hay que reconstruir la imagen web al cambiarlo.
+
 Sin dominio, se puede usar una vista previa interna por `http://192.168.0.110:4310`: define `NODE_ENV=development`, `PUBLIC_URL=http://192.168.0.110:4310`, `PREVIEW_BIND_IP=192.168.0.110` y `PREVIEW_PORT=4310`. El proxy del preview solo admite la red privada `192.168.0.0/16`; no es un despliegue público ni de producción. Sin `SMTP_URL`, los enlaces de verificación quedan en los logs de la API. Cuando exista dominio y correo, vuelve a `NODE_ENV=production` y configura URL HTTPS, SMTP y `MAIL_FROM`.
 
 ## Crear un nicho

@@ -9,6 +9,7 @@ import { apiMessage } from '@/features/shared/lib/messages';
 import { History } from '@/features/store/components/history';
 import { checklist, type Requirement } from '@/features/store/lib/documents';
 import { storeStatusLabel } from '@/features/store/lib/status';
+import { withBasePath } from '@/lib/base-path';
 import { post } from '@/lib/client-api';
 import { availableDecisions } from '../lib/decisions';
 import { DecisionPanel } from './decision-panel';
@@ -114,7 +115,7 @@ export function StoreReviewDetail({ id, requirements, locale }: { id: string; re
                 <li key={key} className="flex flex-wrap items-baseline justify-between gap-4 border-b-2 border-surface py-3">
                   <span className="font-bold">{label}</span>
                   {document ? (
-                    <a href={`/api/admin/store-reviews/${id}/documents/${document.id}`} className="font-bold underline">
+                    <a href={withBasePath(`/api/admin/store-reviews/${id}/documents/${document.id}`)} className="font-bold underline">
                       Descargar
                     </a>
                   ) : (

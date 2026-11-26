@@ -17,8 +17,11 @@ services:
     build:
       context: ..
       dockerfile: deploy/web.Dockerfile
+      args:
+        NEXT_PUBLIC_BASE_PATH: ${NEXT_PUBLIC_BASE_PATH:-}
     environment:
       VERTICAL: ${VERTICAL:?}
+      NEXT_PUBLIC_BASE_PATH: ${NEXT_PUBLIC_BASE_PATH:-}
       API_INTERNAL_URL: http://api:3001
     networks: [dokploy-network, internal]
     mem_limit: 512m

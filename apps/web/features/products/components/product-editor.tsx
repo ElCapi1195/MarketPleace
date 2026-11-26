@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { ResourceGate, useResource } from '@/features/shared/components/resource';
 import { apiMessage } from '@/features/shared/lib/messages';
+import { withBasePath } from '@/lib/base-path';
 import { patch, post } from '@/lib/client-api';
 import { emptyValues, toValues, type FormContext } from '../lib/product-form';
 import { statusLabel } from '../lib/status';
@@ -53,7 +54,7 @@ export function NewProduct({ owner, ...context }: EditorContext & { owner: Edito
   const save = async (input: ProductInput) => {
     const response = await post<AdminProduct>(`${apiBase(owner)}/products`, input);
     if (!response.ok) return apiMessage(response);
-    window.location.assign(`${pagePath(owner)}/${response.data.id}`);
+    window.location.assign(withBasePath(`${pagePath(owner)}/${response.data.id}`));
     return null;
   };
   return <OwnerForm {...context} owner={owner} initial={emptyValues(context.context)} submitLabel="Guardar y añadir fotos" onSave={save} />;

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { withBasePath } from '@/lib/base-path';
 import { post } from '@/lib/client-api';
 import { messageFor } from '../lib/messages';
 import { Field, Form } from './form';
@@ -12,7 +13,7 @@ export function TwoFactorForm({ next }: { next: string }) {
   const verify = async ({ code = '' }: Record<string, string>) => {
     setError(null);
     const result = await post(`/api/auth/two-factor/${backup ? 'verify-backup-code' : 'verify-totp'}`, { code: code.trim() });
-    if (result.ok) window.location.assign(next);
+    if (result.ok) window.location.assign(withBasePath(next));
     else setError(messageFor(result.code, result.message));
   };
 

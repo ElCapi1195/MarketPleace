@@ -4,6 +4,7 @@ import type { StoreDetail } from '@marketplace/contracts';
 import { documentTypes } from '@marketplace/contracts';
 import { useState } from 'react';
 import { apiMessage } from '@/features/shared/lib/messages';
+import { withBasePath } from '@/lib/base-path';
 import { remove, upload } from '@/lib/client-api';
 import { checklist, documentProblem, type Requirement } from '../lib/documents';
 
@@ -53,7 +54,7 @@ export function DocumentList({ store, requirements, editable, onChange }: Docume
               <p role="status">{pending === key ? 'Subiendo…' : document ? 'Recibido' : 'Falta'}</p>
             </div>
             {document && (
-              <a href={`/api/stores/${store.id}/documents/${document.id}`} className="py-2 font-bold underline">
+              <a href={withBasePath(`/api/stores/${store.id}/documents/${document.id}`)} className="py-2 font-bold underline">
                 Descargar
               </a>
             )}

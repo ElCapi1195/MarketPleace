@@ -1,3 +1,5 @@
+import { withBasePath } from './base-path';
+
 export type ApiResult<T> = { ok: true; data: T } | { ok: false; status: number; code: string | undefined; message: string | undefined };
 
 interface ErrorBody {
@@ -8,7 +10,7 @@ interface ErrorBody {
 
 async function request<T>(path: string, init: RequestInit): Promise<ApiResult<T>> {
   try {
-    const response = await fetch(path, { credentials: 'same-origin', cache: 'no-store', ...init });
+    const response = await fetch(withBasePath(path), { credentials: 'same-origin', cache: 'no-store', ...init });
     const body: unknown = await response.json().catch(() => null);
     if (response.ok) return { ok: true, data: body as T };
     const { code, message, error } = (body ?? {}) as ErrorBody;

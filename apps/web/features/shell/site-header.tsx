@@ -1,11 +1,12 @@
 import Link from 'next/link';
 import { AccountLink } from '@/features/account/components/account-link';
 import { catalogHref } from '@/features/catalog/lib/params';
+import { withBasePath } from '@/lib/base-path';
 import { getVertical } from '@/lib/vertical';
 
 function Search() {
   return (
-    <form action="/catalogo" role="search" className="order-3 flex w-full basis-full md:order-none md:w-auto md:max-w-2xl md:flex-1 md:basis-0">
+    <form action={withBasePath('/catalogo')} role="search" className="order-3 flex w-full basis-full md:order-none md:w-auto md:max-w-2xl md:flex-1 md:basis-0">
       <label htmlFor="site-search" className="sr-only">
         Buscar productos
       </label>

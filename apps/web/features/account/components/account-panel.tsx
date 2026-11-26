@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
+import { withBasePath } from '@/lib/base-path';
 import { get, post } from '@/lib/client-api';
 import { messageFor } from '../lib/messages';
 import { describeAgent } from '../lib/user-agent';
@@ -97,7 +98,7 @@ export function AccountPanel() {
   const load = useCallback(async () => {
     const result = await get<Me>('/api/me');
     if (result.ok) setMe(result.data);
-    else if (result.status === 401) window.location.replace('/entrar?siguiente=/cuenta');
+    else if (result.status === 401) window.location.replace(withBasePath('/entrar?siguiente=/cuenta'));
     else setError(messageFor(result.code, result.message));
   }, []);
   useEffect(() => {
@@ -121,7 +122,7 @@ export function AccountPanel() {
         className={secondary}
         onClick={async () => {
           await post('/api/auth/sign-out', {});
-          window.location.assign('/');
+          window.location.assign(withBasePath('/'));
         }}
       >
         Cerrar sesión

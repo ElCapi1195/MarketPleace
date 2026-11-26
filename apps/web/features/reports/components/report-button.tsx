@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import { reasonsFor, reportReasonLabel } from '@/features/admin/lib/reports';
 import { SelectField, TextArea } from '@/features/shared/components/fields';
 import { apiMessage } from '@/features/shared/lib/messages';
+import { withBasePath } from '@/lib/base-path';
 import { post } from '@/lib/client-api';
 
 type Target = { productSlug: string } | { reservationId: string };
@@ -20,7 +21,7 @@ export function ReportButton({ target, label }: { target: Target; label: string 
   const send = async () => {
     const result = await post('/api/reports', { ...target, reason, details });
     if (!result.ok && result.status === 401) {
-      window.location.assign(`/entrar?siguiente=${encodeURIComponent(window.location.pathname)}`);
+      window.location.assign(withBasePath(`/entrar?siguiente=${encodeURIComponent(window.location.pathname)}`));
       return;
     }
     setState(result.ok ? { kind: 'done', text: 'Gracias. Lo revisaremos y te avisaremos por correo.' } : { kind: 'error', text: apiMessage(result) });

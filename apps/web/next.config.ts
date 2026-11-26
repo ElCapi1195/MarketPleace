@@ -17,6 +17,7 @@ const rootEnv = path.join(import.meta.dirname, '../../.env');
 if (isDev && existsSync(rootEnv)) process.loadEnvFile(rootEnv);
 
 const config: NextConfig = {
+  basePath: process.env.NEXT_PUBLIC_BASE_PATH || '',
   poweredByHeader: false,
   // El modo standalone crea enlaces simbólicos; solo se usa al construir la imagen en Linux.
   ...(process.env.NEXT_OUTPUT === 'standalone' && { output: 'standalone' as const }),

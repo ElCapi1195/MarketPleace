@@ -4,6 +4,7 @@ import type { AuditItem } from '@marketplace/contracts';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { SelectField, TextField } from '@/features/shared/components/fields';
 import { apiMessage } from '@/features/shared/lib/messages';
+import { withBasePath } from '@/lib/base-path';
 import { get } from '@/lib/client-api';
 import { actionFilters, auditQuery, describeAction } from '../lib/audit';
 
@@ -23,7 +24,7 @@ export function AuditLog({ locale, initialTarget }: { locale: string; initialTar
   const load = useCallback(async (from: string | null, current: typeof applied) => {
     const result = await get<Page>(`/api/admin/audit?${auditQuery(current, from)}`);
     if (!result.ok) {
-      if (result.status === 401) window.location.replace('/entrar?siguiente=/admin/auditoria');
+      if (result.status === 401) window.location.replace(withBasePath('/entrar?siguiente=/admin/auditoria'));
       return setError(result.code === 'TWO_FACTOR_REQUIRED' ? 'Activa el segundo paso en tu cuenta.' : apiMessage(result));
     }
     setError(null);

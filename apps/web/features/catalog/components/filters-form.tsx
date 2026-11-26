@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { withBasePath } from '@/lib/base-path';
 import { getVertical } from '@/lib/vertical';
 import { kinds, sorts, type Filters } from '../lib/params';
 
@@ -9,7 +10,7 @@ export function FiltersForm({ filters }: { filters: Filters }) {
   const { categories } = getVertical();
   const active = filters.category || filters.kind || filters.sort || filters.q;
   return (
-    <form action="/catalogo" className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-1 lg:gap-5 lg:self-start">
+    <form action={withBasePath('/catalogo')} className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-1 lg:gap-5 lg:self-start">
       {filters.q && <input type="hidden" name="q" value={filters.q} />}
       <label className="flex flex-col gap-1.5 font-bold">
         Categoría

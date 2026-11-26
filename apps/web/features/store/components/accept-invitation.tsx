@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { apiMessage } from '@/features/shared/lib/messages';
+import { withBasePath } from '@/lib/base-path';
 import { post } from '@/lib/client-api';
 
 const KEY = 'invitation';
@@ -43,8 +44,8 @@ export function AcceptInvitation() {
     const result = await post<{ storeId: string }>('/api/store-invitations/accept', { token });
     if (result.ok) {
       forget();
-      window.location.assign(`/tienda/${result.data.storeId}`);
-    } else if (result.status === 401) window.location.assign('/entrar?siguiente=/invitacion');
+      window.location.assign(withBasePath(`/tienda/${result.data.storeId}`));
+    } else if (result.status === 401) window.location.assign(withBasePath('/entrar?siguiente=/invitacion'));
     else if (result.code === 'TWO_FACTOR_REQUIRED') setNeedsTwoFactor(true);
     else {
       if (result.code === 'INVITATION_INVALID') forget();
